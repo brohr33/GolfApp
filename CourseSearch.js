@@ -9,6 +9,7 @@ window.CourseSearch = (function() {
         setSearchQuery, 
         loading, 
         courses, 
+        hasSearched,
         onSearch, 
         onSelectCourse, 
         onBack 
@@ -61,11 +62,6 @@ window.CourseSearch = (function() {
                         ) : 
                         '🔍 Search'
                     )
-                ),
-                
-                e('div', { className: 'status status-info' },
-                    e('strong', null, '🔗 Demo Mode: '), 
-                    'Using sample course data for demonstration'
                 )
             ),
             
@@ -101,8 +97,8 @@ window.CourseSearch = (function() {
                 )
             ),
             
-            // No results message
-            courses.length === 0 && searchQuery && !loading && e('div', { className: 'card text-center' },
+            // No results message - only shows after a search has been performed
+            courses.length === 0 && hasSearched && !loading && e('div', { className: 'card text-center' },
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
