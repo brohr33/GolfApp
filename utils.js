@@ -16,11 +16,13 @@ window.GolfUtils = (function() {
     const showApp = () => {
         $('loading').className = 'hidden';
         $('app').className = '';
+        $('error').className = 'hidden';
     };
     
-    const showFallback = () => {
+    const showError = () => {
         $('loading').className = 'hidden';
-        $('fallback').className = '';
+        $('app').className = 'hidden';
+        $('error').className = '';
     };
     
     // Library loading with error handling
@@ -67,10 +69,12 @@ window.GolfUtils = (function() {
         return name && name.trim() ? name.trim() : `Player ${index + 1}`;
     };
     
-    // Local storage helpers
+    // Local storage helpers (with error handling)
     const saveToStorage = (key, data) => {
         try {
-            localStorage.setItem(`golf-scorecard-${key}`, JSON.stringify(data));
+            if (typeof localStorage !== 'undefined') {
+                localStorage.setItem(`golf-scorecard-${key}`, JSON.stringify(data));
+            }
         } catch (e) {
             console.warn('Could not save to localStorage:', e);
         }
@@ -78,20 +82,20 @@ window.GolfUtils = (function() {
     
     const loadFromStorage = (key) => {
         try {
-            const data = localStorage.getItem(`golf-scorecard-${key}`);
-            return data ? JSON.parse(data) : null;
+            if (typeof localStorage !== 'undefined') {
+                const data = localStorage.getItem(`golf-scorecard-${key}`);
+                return data ? JSON.parse(data) : null;
+            }
         } catch (e) {
             console.warn('Could not load from localStorage:', e);
-            return null;
         }
+        return null;
     };
     
     // Error handling
     const handleError = (error, context = '') => {
         console.error(`Error in ${context}:`, error);
-        
-        // You could add error reporting here
-        // analytics.track('error', { context, error: error.message });
+        updateStatus(`Error: ${error.message}`, 'error');
     };
     
     // Debounce function for search inputs
@@ -112,7 +116,7 @@ window.GolfUtils = (function() {
         $,
         updateStatus,
         showApp,
-        showFallback,
+        showError,
         loadScript,
         validatePlayerName,
         validateHandicap,
