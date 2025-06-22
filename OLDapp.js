@@ -1,5 +1,5 @@
-const { useState, useEffect } = React;
-const { Search, Users, Target, Trophy, Plus, Minus } = lucide;
+import React, { useState, useEffect } from 'react';
+import { Search, Users, Target, Trophy, Plus, Minus } from 'lucide-react';
 
 const GolfScorecardApp = () => {
   const [step, setStep] = useState('setup'); // setup, course-search, scorecard
@@ -557,7 +557,83 @@ const GolfScorecardApp = () => {
                     <h3 className="text-lg font-semibold text-gray-800">{course.name}</h3>
                     <div className="text-gray-600 mt-1">
                       <p>{course.city}, {course.state}</p>
-                      {players.map((player, playerIndex) => {
+                      {course.country && course.country !== 'Unknown Country' && (
+                        <p className="text-sm">{course.country}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
+                      <span className="font-medium">Par: {course.par}</span>
+                      {course.yardage && <span>Yardage: {course.yardage}</span>}
+                      {course.rating && <span>Rating: {course.rating}</span>}
+                      {course.slope && <span>Slope: {course.slope}</span>}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-1">
+                      18 holes • {course.id.includes('fallback') ? 'Fallback data' : 'API data'}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => selectCourse(course)}
+                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors ml-4"
+                  >
+                    Select Course
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={() => setStep('setup')}
+          className="mt-6 text-green-600 hover:text-green-700 transition-colors"
+        >
+          ← Back to Player Setup
+        </button>
+      </div>
+    );
+  }
+
+  if (step === 'scorecard' && selectedCourse) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">{selectedCourse.name}</h1>
+          <div className="text-gray-600">
+            <p>{selectedCourse.city}, {selectedCourse.state}</p>
+            <div className="flex justify-center gap-6 mt-2 text-sm">
+              <span>Par {selectedCourse.par}</span>
+              {selectedCourse.yardage && <span>{selectedCourse.yardage} yards</span>}
+              {selectedCourse.rating && <span>Rating: {selectedCourse.rating}</span>}
+              {selectedCourse.slope && <span>Slope: {selectedCourse.slope}</span>}
+            </div>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse bg-white">
+            <thead>
+              <tr className="bg-green-100 border-b-2 border-green-200">
+                <th className="p-3 text-left font-semibold">Hole</th>
+                <th className="p-3 text-center font-semibold">Par</th>
+                <th className="p-3 text-center font-semibold">Yards</th>
+                <th className="p-3 text-center font-semibold">HCP</th>
+                {players.map((player, index) => (
+                  <th key={index} className="p-3 text-center font-semibold min-w-32">
+                    {player.name || `Player ${index + 1}`}
+                    <div className="text-xs font-normal text-gray-600">HCP: {player.handicap}</div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {selectedCourse.holes.map((hole, index) => (
+                <React.Fragment key={hole.hole}>
+                  <tr className="border-b border-gray-200 hover:bg-gray-50">
+                    <td className="p-3 font-semibold">{hole.hole}</td>
+                    <td className="p-3 text-center">{hole.par}</td>
+                    <td className="p-3 text-center">{hole.yardage}</td>
+                    <td className="p-3 text-center">{hole.handicap}</td>
+                    {players.map((player, playerIndex) => {
                       const strokes = getStrokesForHole(playerIndex, hole.handicap);
                       const isSelectedForTens = tensSelections[playerIndex]?.[hole.hole];
                       const tensCount = Object.values(tensSelections[playerIndex] || {}).filter(Boolean).length;
@@ -734,81 +810,4 @@ const GolfScorecardApp = () => {
   return null;
 };
 
-// Render the app
-ReactDOM.render(React.createElement(GolfScorecardApp), document.getElementById('root'));course.country && course.country !== 'Unknown Country' && (
-                        <p className="text-sm">{course.country}</p>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap gap-4 mt-2 text-sm text-gray-500">
-                      <span className="font-medium">Par: {course.par}</span>
-                      {course.yardage && <span>Yardage: {course.yardage}</span>}
-                      {course.rating && <span>Rating: {course.rating}</span>}
-                      {course.slope && <span>Slope: {course.slope}</span>}
-                    </div>
-                    <div className="text-xs text-gray-400 mt-1">
-                      18 holes • {course.id.includes('fallback') ? 'Fallback data' : 'API data'}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => selectCourse(course)}
-                    className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors ml-4"
-                  >
-                    Select Course
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          onClick={() => setStep('setup')}
-          className="mt-6 text-green-600 hover:text-green-700 transition-colors"
-        >
-          ← Back to Player Setup
-        </button>
-      </div>
-    );
-  }
-
-  if (step === 'scorecard' && selectedCourse) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">{selectedCourse.name}</h1>
-          <div className="text-gray-600">
-            <p>{selectedCourse.city}, {selectedCourse.state}</p>
-            <div className="flex justify-center gap-6 mt-2 text-sm">
-              <span>Par {selectedCourse.par}</span>
-              {selectedCourse.yardage && <span>{selectedCourse.yardage} yards</span>}
-              {selectedCourse.rating && <span>Rating: {selectedCourse.rating}</span>}
-              {selectedCourse.slope && <span>Slope: {selectedCourse.slope}</span>}
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse bg-white">
-            <thead>
-              <tr className="bg-green-100 border-b-2 border-green-200">
-                <th className="p-3 text-left font-semibold">Hole</th>
-                <th className="p-3 text-center font-semibold">Par</th>
-                <th className="p-3 text-center font-semibold">Yards</th>
-                <th className="p-3 text-center font-semibold">HCP</th>
-                {players.map((player, index) => (
-                  <th key={index} className="p-3 text-center font-semibold min-w-32">
-                    {player.name || `Player ${index + 1}`}
-                    <div className="text-xs font-normal text-gray-600">HCP: {player.handicap}</div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {selectedCourse.holes.map((hole, index) => (
-                <React.Fragment key={hole.hole}>
-                  <tr className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="p-3 font-semibold">{hole.hole}</td>
-                    <td className="p-3 text-center">{hole.par}</td>
-                    <td className="p-3 text-center">{hole.yardage}</td>
-                    <td className="p-3 text-center">{hole.handicap}</td>
-                    {
+export default GolfScorecardApp;
