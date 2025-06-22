@@ -1,4 +1,4 @@
-// Enhanced Course Search Component with Debug Tools
+// Enhanced Course Search Component with proper API testing
 window.CourseSearch = (function() {
     'use strict';
     
@@ -16,6 +16,7 @@ window.CourseSearch = (function() {
         
         const [showDebug, setShowDebug] = useState(false);
         const [testResults, setTestResults] = useState(null);
+        const [connectionTest, setConnectionTest] = useState(null);
         
         const handleKeyPress = (evt) => {
             if (evt.key === 'Enter') {
@@ -23,15 +24,39 @@ window.CourseSearch = (function() {
             }
         };
         
-        const testSearchStrategies = async () => {
+        const testAPIConnection = async () => {
+            setConnectionTest('Testing...');
+            try {
+                const result = await GolfAPI.testConnection();
+                setConnectionTest(result);
+                console.log('🧪 Connection test result:', result);
+            } catch (error) {
+                setConnectionTest({ connected: false, error: error.message });
+            }
+        };
+        
+        const testSearchOnly = async () => {
             if (!searchQuery) return;
             
-            setTestResults('testing...');
+            setTestResults('Testing search...');
             try {
-                const results = await GolfAPI.testSearchStrategies(searchQuery);
-                setTestResults(results);
+                const result = await GolfAPI.debugSearch(searchQuery);
+                setTestResults(result);
+                console.log('🔍 Search test result:', result);
             } catch (error) {
-                setTestResults({ error: error.message });
+                setTestResults({ success: false, error: error.message });
+            }
+        };
+        
+        const testGetCourseDetails = async (courseId) => {
+            try {
+                console.log(`🔍 Testing course details for ID: ${courseId}`);
+                const details = await GolfAPI.getCourseDetails(courseId);
+                console.log('📖 Course details:', details);
+                return details;
+            } catch (error) {
+                console.error('❌ Failed to get course details:', error);
+                return null;
             }
         };
         
@@ -55,10 +80,10 @@ window.CourseSearch = (function() {
                 
                 if (courseIdStr.includes('fallback') || courseIdStr.includes('sample')) {
                     return { type: 'fallback', label: 'Curated data', color: '#7c3aed' };
-                } else if (courseId.includes(Date.now().toString().slice(0, 8))) {
-                    return { type: 'api-fresh', label: 'Fresh API data', color: '#059669' };
+                } else if (course._raw) {
+                    return { type: 'api-detailed', label: 'Full API data', color: '#059669' };
                 } else {
-                    return { type: 'api', label: 'API data', color: '#059669' };
+                    return { type: 'api-basic', label: 'API data', color: '#059669' };
                 }
             } catch (error) {
                 return { type: 'unknown', label: 'Course data', color: '#6b7280' };
@@ -77,7 +102,8 @@ window.CourseSearch = (function() {
                     yardage: course?.yardage || course?.total_yardage || null,
                     rating: parseFloat(course?.rating || course?.course_rating) || null,
                     slope: parseInt(course?.slope || course?.slope_rating) || null,
-                    holes: course?.holes || course?.scorecard || null
+                    holes: course?.holes || course?.scorecard || null,
+                    _raw: course?._raw
                 };
             } catch (error) {
                 return {
@@ -115,7 +141,7 @@ window.CourseSearch = (function() {
             } else if (apiCount > 0 && fallbackCount === 0) {
                 return { 
                     type: 'api', 
-                    message: `Found ${apiCount} relevant courses via API`,
+                    message: `✅ Found ${apiCount} courses via Golf Course API`,
                     statusClass: 'status-success'
                 };
             } else if (apiCount > 0 && fallbackCount > 0) {
@@ -135,7 +161,7 @@ window.CourseSearch = (function() {
             e('div', { className: 'card text-center mb-6' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '🔍'),
                 e('h1', { className: 'text-3xl font-bold mb-2' }, 'Find Your Course'),
-                e('p', { className: 'text-gray-600' }, 'Enhanced search with multiple API strategies')
+                e('p', { className: 'text-gray-600' }, 'Search using the official Golf Course API')
             ),
             
             // Search interface
@@ -145,7 +171,7 @@ window.CourseSearch = (function() {
                         type: 'text',
                         value: searchQuery || '',
                         onChange: (evt) => setSearchQuery(evt.target.value),
-                        placeholder: 'Search courses (try "Torrey Pines", "Whistling Straits", etc.)...',
+                        placeholder: 'Search courses (try "Pinehurst", "Bethpage", "Torrey Pines")...',
                         className: 'input',
                         style: { flex: '1' },
                         onKeyPress: handleKeyPress,
@@ -170,10 +196,10 @@ window.CourseSearch = (function() {
                     resultsAnalysis.message
                 ),
                 
-                // Debug toggle
+                // Quick suggestions and debug toggle
                 e('div', { className: 'flex-between mt-4' },
                     e('div', { className: 'flex flex-wrap gap-2' },
-                        ['Torrey Pines', 'Whistling Straits', 'TPC Sawgrass', 'Kiawah Island', 'Bandon Dunes'].map(suggestion =>
+                        ['Pinehurst', 'Bethpage', 'Torrey Pines', 'Kiawah Island', 'Whistling Straits'].map(suggestion =>
                             e('button', {
                                 key: suggestion,
                                 onClick: () => setSearchQuery(suggestion),
@@ -186,7 +212,7 @@ window.CourseSearch = (function() {
                         onClick: () => setShowDebug(!showDebug),
                         className: 'btn btn-secondary',
                         style: { padding: '6px 12px', fontSize: '12px' }
-                    }, showDebug ? 'Hide Debug' : 'Show Debug')
+                    }, showDebug ? 'Hide Debug' : 'Debug API')
                 ),
                 
                 // Debug panel
@@ -198,40 +224,75 @@ window.CourseSearch = (function() {
                         borderRadius: '6px' 
                     } 
                 },
-                    e('h4', { className: 'font-semibold mb-2' }, '🛠️ Debug Tools'),
-                    e('div', { className: 'flex gap-2 mb-3' },
+                    e('h4', { className: 'font-semibold mb-2' }, '🛠️ API Debug Tools'),
+                    e('div', { className: 'grid grid-3 gap-2 mb-3' },
                         e('button', {
-                            onClick: testSearchStrategies,
+                            onClick: testAPIConnection,
+                            className: 'btn btn-secondary',
+                            style: { padding: '4px 8px', fontSize: '11px' }
+                        }, 'Test Connection'),
+                        e('button', {
+                            onClick: testSearchOnly,
                             disabled: !searchQuery,
                             className: 'btn btn-secondary',
                             style: { padding: '4px 8px', fontSize: '11px' }
-                        }, 'Test All Strategies'),
+                        }, 'Test Search Only'),
                         e('button', {
                             onClick: () => GolfAPI.clearCache(),
                             className: 'btn btn-secondary',
                             style: { padding: '4px 8px', fontSize: '11px' }
-                        }, 'Clear Cache'),
-                        e('button', {
-                            onClick: () => console.log('Cache:', GolfAPI.getCacheStats()),
-                            className: 'btn btn-secondary',
-                            style: { padding: '4px 8px', fontSize: '11px' }
-                        }, 'Log Cache')
+                        }, 'Clear Cache')
                     ),
                     
-                    testResults && e('div', { 
-                        style: { 
-                            background: '#fff', 
-                            padding: '8px', 
-                            borderRadius: '4px',
-                            fontSize: '11px',
-                            fontFamily: 'monospace',
-                            maxHeight: '200px',
-                            overflow: 'auto'
-                        } 
-                    }, 
-                        typeof testResults === 'string' ? 
-                            testResults : 
-                            JSON.stringify(testResults, null, 2)
+                    // Connection test results
+                    connectionTest && e('div', { className: 'mb-3' },
+                        e('h5', { className: 'font-medium text-sm mb-1' }, 'Connection Test:'),
+                        e('div', { 
+                            className: `text-xs p-2 rounded`,
+                            style: { 
+                                background: connectionTest.connected ? '#d1fae5' : '#fee2e2',
+                                color: connectionTest.connected ? '#065f46' : '#991b1b',
+                                fontFamily: 'monospace'
+                            }
+                        }, 
+                            typeof connectionTest === 'string' ? 
+                                connectionTest : 
+                                JSON.stringify(connectionTest, null, 2)
+                        )
+                    ),
+                    
+                    // Search test results
+                    testResults && e('div', null,
+                        e('h5', { className: 'font-medium text-sm mb-1' }, 'Search Test:'),
+                        e('div', { 
+                            style: { 
+                                background: '#fff', 
+                                padding: '8px', 
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontFamily: 'monospace',
+                                maxHeight: '200px',
+                                overflow: 'auto',
+                                border: '1px solid #e2e8f0'
+                            } 
+                        }, 
+                            typeof testResults === 'string' ? 
+                                testResults : 
+                                JSON.stringify(testResults, null, 2)
+                        ),
+                        
+                        // Show course IDs for testing
+                        testResults && testResults.sampleIds && e('div', { className: 'mt-2' },
+                            e('div', { className: 'text-xs font-medium mb-1' }, 'Test Course Details:'),
+                            testResults.sampleIds.map(courseId => 
+                                e('button', {
+                                    key: courseId,
+                                    onClick: () => testGetCourseDetails(courseId),
+                                    className: 'btn btn-secondary mr-1 mb-1',
+                                    style: { padding: '2px 6px', fontSize: '10px' }
+                                }, `Get ${courseId}`)
+                            )
+                        )
                     )
                 )
             ),
@@ -282,7 +343,7 @@ window.CourseSearch = (function() {
                                     className: 'text-xs mt-2',
                                     style: { color: sourceInfo.color }
                                 },
-                                    `18 holes • ${sourceInfo.label} • ID: ${safeCourse.id.slice(0, 12)}...`
+                                    `18 holes • ${sourceInfo.label} • ID: ${String(safeCourse.id).slice(0, 12)}...`
                                 )
                             ),
                             e('div', { className: 'btn' }, '⛳ Select →')
@@ -296,7 +357,7 @@ window.CourseSearch = (function() {
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
-                    `No results for "${searchQuery}". Try the debug tools to see what's happening.`
+                    `No results for "${searchQuery}". Try the debug tools to troubleshoot the API.`
                 )
             ),
             
