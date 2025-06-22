@@ -1,8 +1,8 @@
-// Course Search Component using correct OpenAPI endpoints
+// Course Search Component - Clean Production Version
 window.CourseSearch = (function() {
     'use strict';
     
-    const { createElement: e, useState } = React;
+    const { createElement: e } = React;
     
     return function CourseSearch({ 
         searchQuery, 
@@ -14,37 +14,9 @@ window.CourseSearch = (function() {
         onBack 
     }) {
         
-        const [showDebug, setShowDebug] = useState(false);
-        const [connectionTest, setConnectionTest] = useState(null);
-        const [searchTest, setSearchTest] = useState(null);
-        
         const handleKeyPress = (evt) => {
             if (evt.key === 'Enter') {
                 onSearch();
-            }
-        };
-        
-        const testAPIConnection = async () => {
-            setConnectionTest('Testing API connection...');
-            try {
-                const result = await GolfAPI.testConnection();
-                setConnectionTest(result);
-                console.log('🧪 Connection test result:', result);
-            } catch (error) {
-                setConnectionTest({ connected: false, error: error.message });
-            }
-        };
-        
-        const testSearchEndpoint = async () => {
-            if (!searchQuery) return;
-            
-            setSearchTest('Testing search endpoint...');
-            try {
-                const result = await GolfAPI.debugSearch(searchQuery);
-                setSearchTest(result);
-                console.log('🔍 Search test result:', result);
-            } catch (error) {
-                setSearchTest({ success: false, error: error.message });
             }
         };
         
@@ -67,13 +39,11 @@ window.CourseSearch = (function() {
                 const courseIdStr = String(courseId).toLowerCase();
                 
                 if (courseIdStr.includes('fallback') || courseIdStr.includes('sample')) {
-                    return { type: 'fallback', label: 'Curated data', color: '#7c3aed' };
-                } else if (course._raw) {
-                    return { type: 'api-full', label: 'Full API data', color: '#059669' };
+                    return { type: 'fallback', label: 'Curated course data', color: '#7c3aed' };
                 } else if (typeof courseId === 'number' || (typeof courseId === 'string' && /^\d+$/.test(courseId))) {
-                    return { type: 'api-basic', label: 'Live API data', color: '#059669' };
+                    return { type: 'api', label: 'Golf Course API', color: '#059669' };
                 } else {
-                    return { type: 'processed', label: 'Processed data', color: '#6b7280' };
+                    return { type: 'processed', label: 'Course data', color: '#6b7280' };
                 }
             } catch (error) {
                 return { type: 'unknown', label: 'Course data', color: '#6b7280' };
@@ -125,19 +95,19 @@ window.CourseSearch = (function() {
             if (fallbackCount > 0 && apiCount === 0) {
                 return { 
                     type: 'fallback', 
-                    message: 'API search unsuccessful - showing curated courses',
-                    statusClass: 'status-warning'
+                    message: 'Showing curated golf course data',
+                    statusClass: 'status-info'
                 };
             } else if (apiCount > 0 && fallbackCount === 0) {
                 return { 
                     type: 'api', 
-                    message: `✅ Found ${apiCount} courses from Golf Course API`,
+                    message: `Found ${apiCount} course${apiCount !== 1 ? 's' : ''} from Golf Course API`,
                     statusClass: 'status-success'
                 };
             } else if (apiCount > 0 && fallbackCount > 0) {
                 return { 
                     type: 'mixed', 
-                    message: `Mixed: ${apiCount} API + ${fallbackCount} curated`,
+                    message: `Found ${apiCount} live course${apiCount !== 1 ? 's' : ''} plus ${fallbackCount} curated course${fallbackCount !== 1 ? 's' : ''}`,
                     statusClass: 'status-info'
                 };
             }
@@ -151,7 +121,7 @@ window.CourseSearch = (function() {
             e('div', { className: 'card text-center mb-6' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '🔍'),
                 e('h1', { className: 'text-3xl font-bold mb-2' }, 'Find Your Course'),
-                e('p', { className: 'text-gray-600' }, 'Search using the official Golf Course API (OpenAPI spec)')
+                e('p', { className: 'text-gray-600' }, 'Search thousands of golf courses worldwide')
             ),
             
             // Search interface
@@ -161,7 +131,7 @@ window.CourseSearch = (function() {
                         type: 'text',
                         value: searchQuery || '',
                         onChange: (evt) => setSearchQuery(evt.target.value),
-                        placeholder: 'Search courses (try "pinehurst", "pebble", "augusta")...',
+                        placeholder: 'Search courses by name or location (e.g., "Pebble Beach", "Pinehurst", "Augusta")',
                         className: 'input',
                         style: { flex: '1' },
                         onKeyPress: handleKeyPress,
@@ -182,108 +152,28 @@ window.CourseSearch = (function() {
                 
                 // Results status
                 resultsAnalysis && e('div', { className: resultsAnalysis.statusClass },
-                    e('strong', null, '📊 Search Results: '), 
+                    e('strong', null, '📊 '), 
                     resultsAnalysis.message
                 ),
                 
-                // API endpoints info
-                e('div', { className: 'status status-info mt-2' },
-                    e('strong', null, '🔗 API Endpoints: '),
-                    'Using /v1/search and /v1/courses/{id} per OpenAPI specification'
-                ),
-                
-                // Quick suggestions and debug toggle
-                e('div', { className: 'flex-between mt-4' },
-                    e('div', { className: 'flex flex-wrap gap-2' },
-                        ['pinehurst', 'pebble beach', 'augusta', 'torrey pines', 'bethpage'].map(suggestion =>
+                // Quick suggestions
+                !searchQuery && e('div', { className: 'mt-4' },
+                    e('p', { className: 'text-sm text-gray-600 mb-3' }, 'Try searching for these famous courses:'),
+                    e('div', { className: 'grid grid-3 gap-2' },
+                        [
+                            { name: 'Pebble Beach', query: 'pebble beach' },
+                            { name: 'Augusta National', query: 'augusta' },
+                            { name: 'Pinehurst No. 2', query: 'pinehurst' },
+                            { name: 'St Andrews', query: 'st andrews' },
+                            { name: 'Torrey Pines', query: 'torrey pines' },
+                            { name: 'Bethpage Black', query: 'bethpage' }
+                        ].map(suggestion =>
                             e('button', {
-                                key: suggestion,
-                                onClick: () => setSearchQuery(suggestion),
+                                key: suggestion.query,
+                                onClick: () => setSearchQuery(suggestion.query),
                                 className: 'btn btn-secondary',
-                                style: { padding: '4px 8px', fontSize: '12px' }
-                            }, suggestion)
-                        )
-                    ),
-                    e('button', {
-                        onClick: () => setShowDebug(!showDebug),
-                        className: 'btn btn-secondary',
-                        style: { padding: '6px 12px', fontSize: '12px' }
-                    }, showDebug ? 'Hide Debug' : 'API Debug')
-                ),
-                
-                // Debug panel
-                showDebug && e('div', { 
-                    className: 'mt-4 p-4', 
-                    style: { 
-                        background: '#f8fafc', 
-                        border: '1px solid #e2e8f0', 
-                        borderRadius: '6px' 
-                    } 
-                },
-                    e('h4', { className: 'font-semibold mb-3' }, '🛠️ OpenAPI Debug Tools'),
-                    
-                    e('div', { className: 'grid grid-3 gap-2 mb-4' },
-                        e('button', {
-                            onClick: testAPIConnection,
-                            className: 'btn btn-secondary',
-                            style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Test Connection'),
-                        e('button', {
-                            onClick: testSearchEndpoint,
-                            disabled: !searchQuery,
-                            className: 'btn btn-secondary',
-                            style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Test Search'),
-                        e('button', {
-                            onClick: () => GolfAPI.clearCache(),
-                            className: 'btn btn-secondary',
-                            style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Clear Cache')
-                    ),
-                    
-                    e('div', { className: 'text-xs text-gray-600 mb-3' },
-                        'Endpoints: GET /v1/healthcheck, GET /v1/search?search_query=X, GET /v1/courses/{id}'
-                    ),
-                    
-                    // Connection test results
-                    connectionTest && e('div', { className: 'mb-3' },
-                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔗 Connection Test:'),
-                        e('div', { 
-                            className: 'text-xs p-3 rounded',
-                            style: { 
-                                background: connectionTest.connected ? '#d1fae5' : '#fee2e2',
-                                color: connectionTest.connected ? '#065f46' : '#991b1b',
-                                fontFamily: 'monospace',
-                                whiteSpace: 'pre-wrap',
-                                maxHeight: '200px',
-                                overflow: 'auto'
-                            }
-                        }, 
-                            typeof connectionTest === 'string' ? 
-                                connectionTest : 
-                                JSON.stringify(connectionTest, null, 2)
-                        )
-                    ),
-                    
-                    // Search test results
-                    searchTest && e('div', null,
-                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔍 Search Test:'),
-                        e('div', { 
-                            style: { 
-                                background: '#fff', 
-                                padding: '8px', 
-                                borderRadius: '4px',
-                                fontSize: '11px',
-                                fontFamily: 'monospace',
-                                maxHeight: '300px',
-                                overflow: 'auto',
-                                border: '1px solid #e2e8f0',
-                                whiteSpace: 'pre-wrap'
-                            } 
-                        }, 
-                            typeof searchTest === 'string' ? 
-                                searchTest : 
-                                JSON.stringify(searchTest, null, 2)
+                                style: { padding: '8px 12px', fontSize: '14px', textAlign: 'left' }
+                            }, suggestion.name)
                         )
                     )
                 )
@@ -291,61 +181,81 @@ window.CourseSearch = (function() {
             
             // Search results
             (courses && courses.length > 0) && e('div', null,
-                e('div', { className: 'flex-between mb-4' },
+                e('div', { className: 'flex-between mb-6' },
                     e('h2', { className: 'text-2xl font-bold' }, 
                         `Found ${courses.length} Course${courses.length !== 1 ? 's' : ''}`
                     ),
                     searchQuery && e('div', { className: 'text-sm text-gray-600' },
-                        `Results for "${searchQuery}"`
+                        `Search: "${searchQuery}"`
                     )
                 ),
                 
-                courses.map((course, index) => {
-                    const safeCourse = normalizeCourse(course, index);
-                    const sourceInfo = getDataSourceInfo(safeCourse);
-                    
-                    return e('div', { 
-                        key: safeCourse.id, 
-                        className: 'course-card mb-4',
-                        onClick: () => {
-                            try {
-                                onSelectCourse(safeCourse);
-                            } catch (error) {
-                                console.error('Error selecting course:', error);
+                e('div', { className: 'grid gap-4' },
+                    courses.map((course, index) => {
+                        const safeCourse = normalizeCourse(course, index);
+                        const sourceInfo = getDataSourceInfo(safeCourse);
+                        
+                        return e('div', { 
+                            key: safeCourse.id, 
+                            className: 'course-card',
+                            onClick: () => {
+                                try {
+                                    onSelectCourse(safeCourse);
+                                } catch (error) {
+                                    console.error('Error selecting course:', error);
+                                }
                             }
-                        }
-                    },
-                        e('div', { className: 'flex-between' },
-                            e('div', { style: { flex: '1' } },
-                                e('h3', { className: 'text-xl font-bold mb-2' }, safeCourse.name),
-                                safeCourse.club_name && safeCourse.club_name !== safeCourse.name && 
-                                    e('div', { className: 'text-sm text-gray-500 mb-1' }, 
-                                        `Club: ${safeCourse.club_name}`
+                        },
+                            e('div', { className: 'flex-between' },
+                                e('div', { style: { flex: '1' } },
+                                    e('h3', { className: 'text-xl font-bold mb-2' }, safeCourse.name),
+                                    
+                                    // Show club name if different from course name
+                                    safeCourse.club_name && 
+                                    safeCourse.club_name !== safeCourse.name && 
+                                    safeCourse.club_name.toLowerCase() !== safeCourse.name.toLowerCase() &&
+                                        e('div', { 
+                                            className: 'text-sm font-medium text-gray-700 mb-2' 
+                                        }, safeCourse.club_name),
+                                    
+                                    // Location
+                                    e('div', { className: 'text-gray-600 mb-3' },
+                                        e('div', { className: 'flex items-center gap-1' },
+                                            e('span', null, '📍'),
+                                            e('span', null, `${safeCourse.city}, ${safeCourse.state}`),
+                                            (safeCourse.country && safeCourse.country !== 'USA') && 
+                                                e('span', { className: 'text-sm' }, `• ${safeCourse.country}`)
+                                        )
                                     ),
-                                e('div', { className: 'text-gray-600 mb-2' },
-                                    e('div', null, `📍 ${safeCourse.city}, ${safeCourse.state}`),
-                                    (safeCourse.country && safeCourse.country !== 'USA') && 
-                                        e('div', { className: 'text-sm' }, safeCourse.country)
-                                ),
-                                e('div', { className: 'flex flex-wrap gap-4 text-sm' },
-                                    formatCourseInfo(safeCourse).map((info, infoIndex) =>
-                                        e('span', { 
-                                            key: infoIndex, 
-                                            className: infoIndex === 0 ? 'font-medium' : '' 
-                                        }, info)
+                                    
+                                    // Course details
+                                    e('div', { className: 'flex flex-wrap gap-4 text-sm mb-2' },
+                                        formatCourseInfo(safeCourse).map((info, infoIndex) =>
+                                            e('span', { 
+                                                key: infoIndex, 
+                                                className: 'bg-gray-100 px-2 py-1 rounded text-gray-700'
+                                            }, info)
+                                        )
+                                    ),
+                                    
+                                    // Data source
+                                    e('div', { 
+                                        className: 'text-xs',
+                                        style: { color: sourceInfo.color }
+                                    },
+                                        `18 holes • ${sourceInfo.label}`
                                     )
                                 ),
+                                
+                                // Select button
                                 e('div', { 
-                                    className: 'text-xs mt-2',
-                                    style: { color: sourceInfo.color }
-                                },
-                                    `18 holes • ${sourceInfo.label} • ID: ${safeCourse.id}`
-                                )
-                            ),
-                            e('div', { className: 'btn' }, '⛳ Select →')
-                        )
-                    );
-                })
+                                    className: 'btn',
+                                    style: { marginLeft: '16px', flexShrink: 0 }
+                                }, '⛳ Select →')
+                            )
+                        );
+                    })
+                )
             ),
             
             // No results
@@ -353,20 +263,28 @@ window.CourseSearch = (function() {
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
-                    `No results for "${searchQuery}". Use the debug tools to check API connectivity.`
+                    `We couldn't find any courses matching "${searchQuery}".`
+                ),
+                e('p', { className: 'text-sm text-gray-500 mb-4' }, 
+                    'Try searching for the course name, club name, or location.'
                 ),
                 e('button', {
-                    onClick: () => setShowDebug(true),
+                    onClick: () => setSearchQuery(''),
                     className: 'btn btn-secondary'
-                }, 'Open Debug Tools')
+                }, 'Clear Search')
             ),
             
             // Navigation
-            e('div', { className: 'mt-6' },
+            e('div', { className: 'flex-between mt-8' },
                 e('button', {
                     onClick: onBack,
                     className: 'btn btn-secondary'
-                }, '← Back to Setup')
+                }, '← Back to Player Setup'),
+                
+                // Subtle help text
+                e('div', { className: 'text-xs text-gray-500' },
+                    'Powered by Golf Course API'
+                )
             )
         );
     };

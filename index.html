@@ -39,7 +39,7 @@
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
-    <!-- Application Modules - Load in correct order -->
+    <!-- Application Modules -->
     <script src="utils.js"></script>
     <script src="scoring.js"></script>
     <script src="courseData.js"></script>
@@ -49,31 +49,5 @@
     <script src="GameOfTens.js"></script>
     <script src="Scorecard.js"></script>
     <script src="app.js"></script>
-
-    <!-- Debug Script - Remove this after everything works -->
-    <script>
-        // Debug script to check module loading
-        setTimeout(() => {
-            console.log('=== MODULE CHECK ===');
-            console.log('React:', typeof React);
-            console.log('ReactDOM:', typeof ReactDOM);
-            console.log('GolfUtils:', typeof window.GolfUtils);
-            console.log('GolfScoring:', typeof window.GolfScoring);
-            console.log('CourseData:', typeof window.CourseData);
-            console.log('GolfAPI:', typeof window.GolfAPI);
-            console.log('PlayerSetup:', typeof window.PlayerSetup);
-            console.log('CourseSearch:', typeof window.CourseSearch);
-            console.log('GameOfTens:', typeof window.GameOfTens);
-            console.log('Scorecard:', typeof window.Scorecard);
-            
-            // Check if CourseData has the required functions
-            if (window.CourseData) {
-                console.log('CourseData.generatePebbleBeachHoles:', typeof window.CourseData.generatePebbleBeachHoles);
-                console.log('CourseData.generateFallbackCourses:', typeof window.CourseData.generateFallbackCourses);
-            }
-            
-            console.log('=== END MODULE CHECK ===');
-        }, 1000);
-    </script>
 </body>
 </html>
