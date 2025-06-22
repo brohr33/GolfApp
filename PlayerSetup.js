@@ -21,11 +21,9 @@ window.PlayerSetup = (function() {
         };
         
         const validateSetup = () => {
-            // Check if at least one player has a name
-            const hasValidPlayer = players.some(player => 
+            return players.some(player => 
                 GolfUtils.validatePlayerName(player.name)
             );
-            return hasValidPlayer;
         };
         
         return e('div', { className: 'card' },
@@ -36,21 +34,26 @@ window.PlayerSetup = (function() {
             ),
             
             e('div', { className: 'grid gap-6' },
-                // Number of players selector
+                // Number of Players Selection - Updated to buttons
                 e('div', null,
-                    e('label', { className: 'block font-semibold mb-2' }, '👥 Number of Players'),
-                    e('select', {
-                        value: numPlayers,
-                        onChange: (evt) => setNumPlayers(parseInt(evt.target.value)),
-                        className: 'input'
-                    },
+                    e('label', { className: 'block font-semibold mb-3' }, '👥 Number of Players'),
+                    e('div', { className: 'grid grid-4 gap-3' },
                         [1, 2, 3, 4].map(num => 
-                            e('option', { key: num, value: num }, `${num} Player${num > 1 ? 's' : ''}`)
+                            e('button', {
+                                key: num,
+                                onClick: () => setNumPlayers(num),
+                                className: `btn ${numPlayers === num ? '' : 'btn-secondary'}`,
+                                style: { 
+                                    padding: '12px 16px',
+                                    fontSize: '14px',
+                                    fontWeight: numPlayers === num ? '600' : '500'
+                                }
+                            }, `${num} Player${num > 1 ? 's' : ''}`)
                         )
                     )
                 ),
                 
-                // Player configuration
+                // Player Details Forms
                 e('div', { className: 'grid gap-4' },
                     players.map((player, index) =>
                         e('div', { 
@@ -86,7 +89,7 @@ window.PlayerSetup = (function() {
                     )
                 ),
                 
-                // Game of Tens toggle
+                // Game of Tens Toggle
                 e('div', { 
                     className: 'card', 
                     style: { background: '#f3e8ff', border: '2px solid #a855f7' } 
@@ -105,7 +108,7 @@ window.PlayerSetup = (function() {
                     )
                 ),
                 
-                // Continue button
+                // Continue Button
                 e('button', {
                     onClick: onContinue,
                     className: 'btn',
@@ -114,7 +117,7 @@ window.PlayerSetup = (function() {
                 }, '🔍 Find Golf Course →')
             ),
             
-            // Help text
+            // Game of Tens Info
             playTens && e('div', { className: 'status status-info mt-4' },
                 e('strong', null, 'Game of Tens: '),
                 'Each player will select their best 10 holes after the round. Only those holes count towards the Tens competition!'
