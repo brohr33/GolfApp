@@ -1,4 +1,4 @@
-// Course Search Component with API Endpoint Discovery
+// Course Search Component using correct OpenAPI endpoints
 window.CourseSearch = (function() {
     'use strict';
     
@@ -15,8 +15,8 @@ window.CourseSearch = (function() {
     }) {
         
         const [showDebug, setShowDebug] = useState(false);
-        const [discoveryResults, setDiscoveryResults] = useState(null);
         const [connectionTest, setConnectionTest] = useState(null);
+        const [searchTest, setSearchTest] = useState(null);
         
         const handleKeyPress = (evt) => {
             if (evt.key === 'Enter') {
@@ -24,19 +24,8 @@ window.CourseSearch = (function() {
             }
         };
         
-        const runEndpointDiscovery = async () => {
-            setDiscoveryResults('Discovering endpoints...');
-            try {
-                const result = await GolfAPI.discoverWorkingEndpoint('Pebble Beach');
-                setDiscoveryResults(result);
-                console.log('🔍 Endpoint discovery result:', result);
-            } catch (error) {
-                setDiscoveryResults({ error: error.message });
-            }
-        };
-        
         const testAPIConnection = async () => {
-            setConnectionTest('Testing connection...');
+            setConnectionTest('Testing API connection...');
             try {
                 const result = await GolfAPI.testConnection();
                 setConnectionTest(result);
@@ -46,11 +35,17 @@ window.CourseSearch = (function() {
             }
         };
         
-        const resetAndRetry = () => {
-            GolfAPI.resetEndpointDiscovery();
-            GolfAPI.clearCache();
-            setDiscoveryResults(null);
-            setConnectionTest(null);
+        const testSearchEndpoint = async () => {
+            if (!searchQuery) return;
+            
+            setSearchTest('Testing search endpoint...');
+            try {
+                const result = await GolfAPI.debugSearch(searchQuery);
+                setSearchTest(result);
+                console.log('🔍 Search test result:', result);
+            } catch (error) {
+                setSearchTest({ success: false, error: error.message });
+            }
         };
         
         const formatCourseInfo = (course) => {
@@ -73,10 +68,12 @@ window.CourseSearch = (function() {
                 
                 if (courseIdStr.includes('fallback') || courseIdStr.includes('sample')) {
                     return { type: 'fallback', label: 'Curated data', color: '#7c3aed' };
-                } else if (course._raw || courseId.includes('api-')) {
-                    return { type: 'api', label: 'Live API data', color: '#059669' };
+                } else if (course._raw) {
+                    return { type: 'api-full', label: 'Full API data', color: '#059669' };
+                } else if (typeof courseId === 'number' || (typeof courseId === 'string' && /^\d+$/.test(courseId))) {
+                    return { type: 'api-basic', label: 'Live API data', color: '#059669' };
                 } else {
-                    return { type: 'processed', label: 'Processed data', color: '#059669' };
+                    return { type: 'processed', label: 'Processed data', color: '#6b7280' };
                 }
             } catch (error) {
                 return { type: 'unknown', label: 'Course data', color: '#6b7280' };
@@ -87,15 +84,16 @@ window.CourseSearch = (function() {
             try {
                 return {
                     id: course?.id || `course-${index}`,
-                    name: course?.name || course?.course_name || course?.courseName || `Course ${index + 1}`,
-                    city: course?.city || course?.location?.city || 'Unknown City',
-                    state: course?.state || course?.location?.state || 'Unknown State',
-                    country: course?.country || course?.location?.country || 'USA',
-                    par: parseInt(course?.par || course?.total_par || 72),
-                    yardage: course?.yardage || course?.total_yardage || null,
-                    rating: parseFloat(course?.rating || course?.course_rating) || null,
-                    slope: parseInt(course?.slope || course?.slope_rating) || null,
-                    holes: course?.holes || course?.scorecard || null,
+                    name: course?.name || course?.course_name || course?.club_name || `Course ${index + 1}`,
+                    club_name: course?.club_name || course?.name,
+                    city: course?.city || 'Unknown City',
+                    state: course?.state || 'Unknown State',
+                    country: course?.country || 'USA',
+                    par: parseInt(course?.par || 72),
+                    yardage: course?.yardage || null,
+                    rating: parseFloat(course?.rating) || null,
+                    slope: parseInt(course?.slope) || null,
+                    holes: course?.holes || null,
                     _raw: course?._raw
                 };
             } catch (error) {
@@ -127,13 +125,13 @@ window.CourseSearch = (function() {
             if (fallbackCount > 0 && apiCount === 0) {
                 return { 
                     type: 'fallback', 
-                    message: 'API endpoints not working - showing curated courses',
+                    message: 'API search unsuccessful - showing curated courses',
                     statusClass: 'status-warning'
                 };
             } else if (apiCount > 0 && fallbackCount === 0) {
                 return { 
                     type: 'api', 
-                    message: `✅ Found ${apiCount} courses via API endpoint discovery`,
+                    message: `✅ Found ${apiCount} courses from Golf Course API`,
                     statusClass: 'status-success'
                 };
             } else if (apiCount > 0 && fallbackCount > 0) {
@@ -153,7 +151,7 @@ window.CourseSearch = (function() {
             e('div', { className: 'card text-center mb-6' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '🔍'),
                 e('h1', { className: 'text-3xl font-bold mb-2' }, 'Find Your Course'),
-                e('p', { className: 'text-gray-600' }, 'Smart API endpoint discovery for reliable course search')
+                e('p', { className: 'text-gray-600' }, 'Search using the official Golf Course API (OpenAPI spec)')
             ),
             
             // Search interface
@@ -163,7 +161,7 @@ window.CourseSearch = (function() {
                         type: 'text',
                         value: searchQuery || '',
                         onChange: (evt) => setSearchQuery(evt.target.value),
-                        placeholder: 'Search courses - the app will find working API endpoints automatically',
+                        placeholder: 'Search courses (try "pinehurst", "pebble", "augusta")...',
                         className: 'input',
                         style: { flex: '1' },
                         onKeyPress: handleKeyPress,
@@ -188,10 +186,16 @@ window.CourseSearch = (function() {
                     resultsAnalysis.message
                 ),
                 
-                // Quick actions
+                // API endpoints info
+                e('div', { className: 'status status-info mt-2' },
+                    e('strong', null, '🔗 API Endpoints: '),
+                    'Using /v1/search and /v1/courses/{id} per OpenAPI specification'
+                ),
+                
+                // Quick suggestions and debug toggle
                 e('div', { className: 'flex-between mt-4' },
                     e('div', { className: 'flex flex-wrap gap-2' },
-                        ['Pebble Beach', 'Pinehurst', 'Bethpage', 'Torrey Pines', 'TPC'].map(suggestion =>
+                        ['pinehurst', 'pebble beach', 'augusta', 'torrey pines', 'bethpage'].map(suggestion =>
                             e('button', {
                                 key: suggestion,
                                 onClick: () => setSearchQuery(suggestion),
@@ -216,29 +220,29 @@ window.CourseSearch = (function() {
                         borderRadius: '6px' 
                     } 
                 },
-                    e('h4', { className: 'font-semibold mb-3' }, '🛠️ API Endpoint Discovery'),
+                    e('h4', { className: 'font-semibold mb-3' }, '🛠️ OpenAPI Debug Tools'),
                     
-                    e('div', { className: 'grid grid-4 gap-2 mb-4' },
+                    e('div', { className: 'grid grid-3 gap-2 mb-4' },
                         e('button', {
                             onClick: testAPIConnection,
                             className: 'btn btn-secondary',
                             style: { padding: '6px 8px', fontSize: '11px' }
                         }, 'Test Connection'),
                         e('button', {
-                            onClick: runEndpointDiscovery,
+                            onClick: testSearchEndpoint,
+                            disabled: !searchQuery,
                             className: 'btn btn-secondary',
                             style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Discover Endpoints'),
+                        }, 'Test Search'),
                         e('button', {
-                            onClick: resetAndRetry,
+                            onClick: () => GolfAPI.clearCache(),
                             className: 'btn btn-secondary',
                             style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Reset & Retry'),
-                        e('button', {
-                            onClick: () => console.log('API Stats:', GolfAPI.getCacheStats()),
-                            className: 'btn btn-secondary',
-                            style: { padding: '6px 8px', fontSize: '11px' }
-                        }, 'Log Stats')
+                        }, 'Clear Cache')
+                    ),
+                    
+                    e('div', { className: 'text-xs text-gray-600 mb-3' },
+                        'Endpoints: GET /v1/healthcheck, GET /v1/search?search_query=X, GET /v1/courses/{id}'
                     ),
                     
                     // Connection test results
@@ -250,7 +254,9 @@ window.CourseSearch = (function() {
                                 background: connectionTest.connected ? '#d1fae5' : '#fee2e2',
                                 color: connectionTest.connected ? '#065f46' : '#991b1b',
                                 fontFamily: 'monospace',
-                                whiteSpace: 'pre-wrap'
+                                whiteSpace: 'pre-wrap',
+                                maxHeight: '200px',
+                                overflow: 'auto'
                             }
                         }, 
                             typeof connectionTest === 'string' ? 
@@ -259,9 +265,9 @@ window.CourseSearch = (function() {
                         )
                     ),
                     
-                    // Discovery results
-                    discoveryResults && e('div', { className: 'mb-3' },
-                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔍 Endpoint Discovery:'),
+                    // Search test results
+                    searchTest && e('div', null,
+                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔍 Search Test:'),
                         e('div', { 
                             style: { 
                                 background: '#fff', 
@@ -275,14 +281,10 @@ window.CourseSearch = (function() {
                                 whiteSpace: 'pre-wrap'
                             } 
                         }, 
-                            typeof discoveryResults === 'string' ? 
-                                discoveryResults : 
-                                JSON.stringify(discoveryResults, null, 2)
+                            typeof searchTest === 'string' ? 
+                                searchTest : 
+                                JSON.stringify(searchTest, null, 2)
                         )
-                    ),
-                    
-                    e('div', { className: 'text-xs text-gray-600 mt-2' },
-                        'This tool tests multiple API endpoint variations to find one that works with your API key.'
                     )
                 )
             ),
@@ -316,6 +318,10 @@ window.CourseSearch = (function() {
                         e('div', { className: 'flex-between' },
                             e('div', { style: { flex: '1' } },
                                 e('h3', { className: 'text-xl font-bold mb-2' }, safeCourse.name),
+                                safeCourse.club_name && safeCourse.club_name !== safeCourse.name && 
+                                    e('div', { className: 'text-sm text-gray-500 mb-1' }, 
+                                        `Club: ${safeCourse.club_name}`
+                                    ),
                                 e('div', { className: 'text-gray-600 mb-2' },
                                     e('div', null, `📍 ${safeCourse.city}, ${safeCourse.state}`),
                                     (safeCourse.country && safeCourse.country !== 'USA') && 
@@ -333,7 +339,7 @@ window.CourseSearch = (function() {
                                     className: 'text-xs mt-2',
                                     style: { color: sourceInfo.color }
                                 },
-                                    `18 holes • ${sourceInfo.label}`
+                                    `18 holes • ${sourceInfo.label} • ID: ${safeCourse.id}`
                                 )
                             ),
                             e('div', { className: 'btn' }, '⛳ Select →')
@@ -347,7 +353,7 @@ window.CourseSearch = (function() {
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
-                    `No results for "${searchQuery}". Try the endpoint discovery tools above.`
+                    `No results for "${searchQuery}". Use the debug tools to check API connectivity.`
                 ),
                 e('button', {
                     onClick: () => setShowDebug(true),
