@@ -1,4 +1,4 @@
-// Enhanced Course Search Component with proper API testing
+// Course Search Component with API Endpoint Discovery
 window.CourseSearch = (function() {
     'use strict';
     
@@ -15,7 +15,7 @@ window.CourseSearch = (function() {
     }) {
         
         const [showDebug, setShowDebug] = useState(false);
-        const [testResults, setTestResults] = useState(null);
+        const [discoveryResults, setDiscoveryResults] = useState(null);
         const [connectionTest, setConnectionTest] = useState(null);
         
         const handleKeyPress = (evt) => {
@@ -24,8 +24,19 @@ window.CourseSearch = (function() {
             }
         };
         
+        const runEndpointDiscovery = async () => {
+            setDiscoveryResults('Discovering endpoints...');
+            try {
+                const result = await GolfAPI.discoverWorkingEndpoint('Pebble Beach');
+                setDiscoveryResults(result);
+                console.log('🔍 Endpoint discovery result:', result);
+            } catch (error) {
+                setDiscoveryResults({ error: error.message });
+            }
+        };
+        
         const testAPIConnection = async () => {
-            setConnectionTest('Testing...');
+            setConnectionTest('Testing connection...');
             try {
                 const result = await GolfAPI.testConnection();
                 setConnectionTest(result);
@@ -35,29 +46,11 @@ window.CourseSearch = (function() {
             }
         };
         
-        const testSearchOnly = async () => {
-            if (!searchQuery) return;
-            
-            setTestResults('Testing search...');
-            try {
-                const result = await GolfAPI.debugSearch(searchQuery);
-                setTestResults(result);
-                console.log('🔍 Search test result:', result);
-            } catch (error) {
-                setTestResults({ success: false, error: error.message });
-            }
-        };
-        
-        const testGetCourseDetails = async (courseId) => {
-            try {
-                console.log(`🔍 Testing course details for ID: ${courseId}`);
-                const details = await GolfAPI.getCourseDetails(courseId);
-                console.log('📖 Course details:', details);
-                return details;
-            } catch (error) {
-                console.error('❌ Failed to get course details:', error);
-                return null;
-            }
+        const resetAndRetry = () => {
+            GolfAPI.resetEndpointDiscovery();
+            GolfAPI.clearCache();
+            setDiscoveryResults(null);
+            setConnectionTest(null);
         };
         
         const formatCourseInfo = (course) => {
@@ -80,10 +73,10 @@ window.CourseSearch = (function() {
                 
                 if (courseIdStr.includes('fallback') || courseIdStr.includes('sample')) {
                     return { type: 'fallback', label: 'Curated data', color: '#7c3aed' };
-                } else if (course._raw) {
-                    return { type: 'api-detailed', label: 'Full API data', color: '#059669' };
+                } else if (course._raw || courseId.includes('api-')) {
+                    return { type: 'api', label: 'Live API data', color: '#059669' };
                 } else {
-                    return { type: 'api-basic', label: 'API data', color: '#059669' };
+                    return { type: 'processed', label: 'Processed data', color: '#059669' };
                 }
             } catch (error) {
                 return { type: 'unknown', label: 'Course data', color: '#6b7280' };
@@ -121,7 +114,6 @@ window.CourseSearch = (function() {
             }
         };
         
-        // Analyze results to show what strategies worked
         const getResultsAnalysis = () => {
             if (!courses || courses.length === 0) return null;
             
@@ -135,20 +127,20 @@ window.CourseSearch = (function() {
             if (fallbackCount > 0 && apiCount === 0) {
                 return { 
                     type: 'fallback', 
-                    message: 'API search unsuccessful - showing curated courses',
-                    statusClass: 'status-info'
+                    message: 'API endpoints not working - showing curated courses',
+                    statusClass: 'status-warning'
                 };
             } else if (apiCount > 0 && fallbackCount === 0) {
                 return { 
                     type: 'api', 
-                    message: `✅ Found ${apiCount} courses via Golf Course API`,
+                    message: `✅ Found ${apiCount} courses via API endpoint discovery`,
                     statusClass: 'status-success'
                 };
             } else if (apiCount > 0 && fallbackCount > 0) {
                 return { 
                     type: 'mixed', 
-                    message: `Mixed results: ${apiCount} API + ${fallbackCount} curated`,
-                    statusClass: 'status-warning'
+                    message: `Mixed: ${apiCount} API + ${fallbackCount} curated`,
+                    statusClass: 'status-info'
                 };
             }
             return null;
@@ -161,7 +153,7 @@ window.CourseSearch = (function() {
             e('div', { className: 'card text-center mb-6' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '🔍'),
                 e('h1', { className: 'text-3xl font-bold mb-2' }, 'Find Your Course'),
-                e('p', { className: 'text-gray-600' }, 'Search using the official Golf Course API')
+                e('p', { className: 'text-gray-600' }, 'Smart API endpoint discovery for reliable course search')
             ),
             
             // Search interface
@@ -171,7 +163,7 @@ window.CourseSearch = (function() {
                         type: 'text',
                         value: searchQuery || '',
                         onChange: (evt) => setSearchQuery(evt.target.value),
-                        placeholder: 'Search courses (try "Pinehurst", "Bethpage", "Torrey Pines")...',
+                        placeholder: 'Search courses - the app will find working API endpoints automatically',
                         className: 'input',
                         style: { flex: '1' },
                         onKeyPress: handleKeyPress,
@@ -196,10 +188,10 @@ window.CourseSearch = (function() {
                     resultsAnalysis.message
                 ),
                 
-                // Quick suggestions and debug toggle
+                // Quick actions
                 e('div', { className: 'flex-between mt-4' },
                     e('div', { className: 'flex flex-wrap gap-2' },
-                        ['Pinehurst', 'Bethpage', 'Torrey Pines', 'Kiawah Island', 'Whistling Straits'].map(suggestion =>
+                        ['Pebble Beach', 'Pinehurst', 'Bethpage', 'Torrey Pines', 'TPC'].map(suggestion =>
                             e('button', {
                                 key: suggestion,
                                 onClick: () => setSearchQuery(suggestion),
@@ -212,7 +204,7 @@ window.CourseSearch = (function() {
                         onClick: () => setShowDebug(!showDebug),
                         className: 'btn btn-secondary',
                         style: { padding: '6px 12px', fontSize: '12px' }
-                    }, showDebug ? 'Hide Debug' : 'Debug API')
+                    }, showDebug ? 'Hide Debug' : 'API Debug')
                 ),
                 
                 // Debug panel
@@ -224,35 +216,41 @@ window.CourseSearch = (function() {
                         borderRadius: '6px' 
                     } 
                 },
-                    e('h4', { className: 'font-semibold mb-2' }, '🛠️ API Debug Tools'),
-                    e('div', { className: 'grid grid-3 gap-2 mb-3' },
+                    e('h4', { className: 'font-semibold mb-3' }, '🛠️ API Endpoint Discovery'),
+                    
+                    e('div', { className: 'grid grid-4 gap-2 mb-4' },
                         e('button', {
                             onClick: testAPIConnection,
                             className: 'btn btn-secondary',
-                            style: { padding: '4px 8px', fontSize: '11px' }
+                            style: { padding: '6px 8px', fontSize: '11px' }
                         }, 'Test Connection'),
                         e('button', {
-                            onClick: testSearchOnly,
-                            disabled: !searchQuery,
+                            onClick: runEndpointDiscovery,
                             className: 'btn btn-secondary',
-                            style: { padding: '4px 8px', fontSize: '11px' }
-                        }, 'Test Search Only'),
+                            style: { padding: '6px 8px', fontSize: '11px' }
+                        }, 'Discover Endpoints'),
                         e('button', {
-                            onClick: () => GolfAPI.clearCache(),
+                            onClick: resetAndRetry,
                             className: 'btn btn-secondary',
-                            style: { padding: '4px 8px', fontSize: '11px' }
-                        }, 'Clear Cache')
+                            style: { padding: '6px 8px', fontSize: '11px' }
+                        }, 'Reset & Retry'),
+                        e('button', {
+                            onClick: () => console.log('API Stats:', GolfAPI.getCacheStats()),
+                            className: 'btn btn-secondary',
+                            style: { padding: '6px 8px', fontSize: '11px' }
+                        }, 'Log Stats')
                     ),
                     
                     // Connection test results
                     connectionTest && e('div', { className: 'mb-3' },
-                        e('h5', { className: 'font-medium text-sm mb-1' }, 'Connection Test:'),
+                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔗 Connection Test:'),
                         e('div', { 
-                            className: `text-xs p-2 rounded`,
+                            className: 'text-xs p-3 rounded',
                             style: { 
                                 background: connectionTest.connected ? '#d1fae5' : '#fee2e2',
                                 color: connectionTest.connected ? '#065f46' : '#991b1b',
-                                fontFamily: 'monospace'
+                                fontFamily: 'monospace',
+                                whiteSpace: 'pre-wrap'
                             }
                         }, 
                             typeof connectionTest === 'string' ? 
@@ -261,9 +259,9 @@ window.CourseSearch = (function() {
                         )
                     ),
                     
-                    // Search test results
-                    testResults && e('div', null,
-                        e('h5', { className: 'font-medium text-sm mb-1' }, 'Search Test:'),
+                    // Discovery results
+                    discoveryResults && e('div', { className: 'mb-3' },
+                        e('h5', { className: 'font-medium text-sm mb-1' }, '🔍 Endpoint Discovery:'),
                         e('div', { 
                             style: { 
                                 background: '#fff', 
@@ -271,28 +269,20 @@ window.CourseSearch = (function() {
                                 borderRadius: '4px',
                                 fontSize: '11px',
                                 fontFamily: 'monospace',
-                                maxHeight: '200px',
+                                maxHeight: '300px',
                                 overflow: 'auto',
-                                border: '1px solid #e2e8f0'
+                                border: '1px solid #e2e8f0',
+                                whiteSpace: 'pre-wrap'
                             } 
                         }, 
-                            typeof testResults === 'string' ? 
-                                testResults : 
-                                JSON.stringify(testResults, null, 2)
-                        ),
-                        
-                        // Show course IDs for testing
-                        testResults && testResults.sampleIds && e('div', { className: 'mt-2' },
-                            e('div', { className: 'text-xs font-medium mb-1' }, 'Test Course Details:'),
-                            testResults.sampleIds.map(courseId => 
-                                e('button', {
-                                    key: courseId,
-                                    onClick: () => testGetCourseDetails(courseId),
-                                    className: 'btn btn-secondary mr-1 mb-1',
-                                    style: { padding: '2px 6px', fontSize: '10px' }
-                                }, `Get ${courseId}`)
-                            )
+                            typeof discoveryResults === 'string' ? 
+                                discoveryResults : 
+                                JSON.stringify(discoveryResults, null, 2)
                         )
+                    ),
+                    
+                    e('div', { className: 'text-xs text-gray-600 mt-2' },
+                        'This tool tests multiple API endpoint variations to find one that works with your API key.'
                     )
                 )
             ),
@@ -343,7 +333,7 @@ window.CourseSearch = (function() {
                                     className: 'text-xs mt-2',
                                     style: { color: sourceInfo.color }
                                 },
-                                    `18 holes • ${sourceInfo.label} • ID: ${String(safeCourse.id).slice(0, 12)}...`
+                                    `18 holes • ${sourceInfo.label}`
                                 )
                             ),
                             e('div', { className: 'btn' }, '⛳ Select →')
@@ -357,8 +347,12 @@ window.CourseSearch = (function() {
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
-                    `No results for "${searchQuery}". Try the debug tools to troubleshoot the API.`
-                )
+                    `No results for "${searchQuery}". Try the endpoint discovery tools above.`
+                ),
+                e('button', {
+                    onClick: () => setShowDebug(true),
+                    className: 'btn btn-secondary'
+                }, 'Open Debug Tools')
             ),
             
             // Navigation

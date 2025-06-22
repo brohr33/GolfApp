@@ -1,26 +1,55 @@
-// Golf Course API implementation following official documentation
+// Robust Golf Course API implementation with endpoint discovery
 window.GolfAPI = (function() {
     'use strict';
     
     const API_KEY = 'VLNANFMEVIQBJ6T75A52WMQUKI';
-    const BASE_URL = 'https://api.golfcourseapi.com';
     const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    
+    // Multiple endpoint variations to try
+    const ENDPOINT_VARIATIONS = [
+        // Based on documentation
+        'https://api.golfcourseapi.com/courses',
+        'https://api.golfcourseapi.com/v1/courses', 
+        'https://golfcourseapi.com/api/courses',
+        'https://golfcourseapi.com/courses',
+        
+        // Alternative formats
+        'https://api.golfcourseapi.com/course/search',
+        'https://api.golfcourseapi.com/v1/course/search',
+        'https://api.golfcourseapi.com/search/courses',
+        'https://api.golfcourseapi.com/v1/search/courses',
+        
+        // Without subdomain
+        'https://golfcourseapi.com/v1/courses',
+        'https://golfcourseapi.com/api/v1/courses'
+    ];
+    
+    // Different parameter formats to try
+    const SEARCH_PARAM_FORMATS = [
+        'search_query',
+        'search',
+        'query',
+        'q',
+        'name',
+        'course_name'
+    ];
     
     // In-memory cache
     const cache = new Map();
     
-    // Check if cache entry is valid
+    // Working endpoint cache
+    let workingEndpoint = null;
+    let workingParamFormat = null;
+    
     const isCacheValid = (entry) => {
         return entry && (Date.now() - entry.timestamp) < CACHE_DURATION;
     };
     
-    // Get from cache
     const getFromCache = (key) => {
         const entry = cache.get(key);
         return isCacheValid(entry) ? entry.data : null;
     };
     
-    // Save to cache
     const saveToCache = (key, data) => {
         cache.set(key, {
             data,
@@ -28,78 +57,154 @@ window.GolfAPI = (function() {
         });
     };
     
-    // Make API request with proper authentication
-    const makeAPIRequest = async (url) => {
-        console.log(`🔍 API Request: ${url}`);
-        
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Key ${API_KEY}`,
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        console.log(`📊 Response: ${response.status} ${response.statusText}`);
-        
-        if (!response.ok) {
-            if (response.status === 401) {
-                throw new Error('API key is missing or invalid');
-            } else if (response.status === 404) {
-                throw new Error('Course not found');
-            } else {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
+    // Make API request with comprehensive error handling
+    const makeAPIRequest = async (url, testMode = false) => {
+        if (!testMode) {
+            console.log(`🔍 API Request: ${url}`);
         }
         
-        const data = await response.json();
-        console.log(`✅ Response data:`, data);
-        return data;
-    };
-    
-    // Step 1: Search for courses (returns course IDs)
-    const searchCourseIds = async (searchQuery) => {
-        const searchUrl = `${BASE_URL}/courses?search_query=${encodeURIComponent(searchQuery)}`;
-        
         try {
-            const searchResults = await makeAPIRequest(searchUrl);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Key ${API_KEY}`,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'User-Agent': 'GolfScorecardPro/1.0'
+                }
+            });
             
-            // The API should return an array of course objects with IDs
-            if (Array.isArray(searchResults)) {
-                console.log(`🎯 Search found ${searchResults.length} courses`);
-                return searchResults;
-            } else if (searchResults.courses && Array.isArray(searchResults.courses)) {
-                console.log(`🎯 Search found ${searchResults.courses.length} courses`);
-                return searchResults.courses;
-            } else if (searchResults.data && Array.isArray(searchResults.data)) {
-                console.log(`🎯 Search found ${searchResults.data.length} courses`);
-                return searchResults.data;
-            } else {
-                console.log('🔍 Unexpected search response format:', searchResults);
-                return [];
+            if (!testMode) {
+                console.log(`📊 Response: ${response.status} ${response.statusText}`);
             }
+            
+            if (!response.ok) {
+                const errorText = await response.text().catch(() => 'Unknown error');
+                throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+            }
+            
+            const data = await response.json();
+            if (!testMode) {
+                console.log(`✅ Response data preview:`, data?.length ? `Array of ${data.length} items` : data);
+            }
+            return data;
+            
         } catch (error) {
-            console.error('❌ Search failed:', error.message);
+            if (!testMode) {
+                console.error(`❌ Request failed:`, error.message);
+            }
             throw error;
         }
     };
     
-    // Step 2: Get detailed course information by ID
-    const getCourseDetails = async (courseId) => {
-        const courseUrl = `${BASE_URL}/courses/${courseId}`;
+    // Test a single endpoint/parameter combination
+    const testEndpointVariation = async (baseUrl, paramName, searchQuery) => {
+        const url = `${baseUrl}?${paramName}=${encodeURIComponent(searchQuery)}`;
         
         try {
-            const courseDetails = await makeAPIRequest(courseUrl);
-            console.log(`📖 Got details for course ${courseId}`);
-            return courseDetails;
+            const data = await makeAPIRequest(url, true);
+            
+            // Check if response looks like course data
+            if (Array.isArray(data) && data.length > 0) {
+                return { success: true, url, data, count: data.length };
+            } else if (data && typeof data === 'object' && (data.courses || data.data || data.results)) {
+                const courses = data.courses || data.data || data.results;
+                if (Array.isArray(courses) && courses.length > 0) {
+                    return { success: true, url, data: courses, count: courses.length };
+                }
+            }
+            
+            return { success: false, url, reason: 'No course data in response' };
+            
         } catch (error) {
-            console.error(`❌ Failed to get details for course ${courseId}:`, error.message);
-            throw error;
+            return { success: false, url, error: error.message };
         }
     };
     
-    // Transform and normalize course data
+    // Discover working endpoint
+    const discoverWorkingEndpoint = async (searchQuery = 'Pebble Beach') => {
+        console.log('🔍 Discovering working API endpoint...');
+        
+        for (const endpoint of ENDPOINT_VARIATIONS) {
+            for (const paramFormat of SEARCH_PARAM_FORMATS) {
+                console.log(`🧪 Testing: ${endpoint}?${paramFormat}=${searchQuery}`);
+                
+                const result = await testEndpointVariation(endpoint, paramFormat, searchQuery);
+                
+                if (result.success) {
+                    console.log(`✅ Found working endpoint: ${result.url}`);
+                    console.log(`📊 Returned ${result.count} courses`);
+                    
+                    workingEndpoint = endpoint;
+                    workingParamFormat = paramFormat;
+                    
+                    return {
+                        endpoint,
+                        paramFormat,
+                        url: result.url,
+                        sampleData: result.data.slice(0, 3) // First 3 courses
+                    };
+                }
+            }
+        }
+        
+        console.log('❌ No working endpoint found');
+        return null;
+    };
+    
+    // Search using discovered or cached working endpoint
+    const searchWithWorkingEndpoint = async (searchQuery) => {
+        if (!workingEndpoint || !workingParamFormat) {
+            console.log('🔍 No working endpoint cached, discovering...');
+            const discovery = await discoverWorkingEndpoint(searchQuery);
+            if (!discovery) {
+                throw new Error('No working API endpoint found');
+            }
+        }
+        
+        const url = `${workingEndpoint}?${workingParamFormat}=${encodeURIComponent(searchQuery)}`;
+        const data = await makeAPIRequest(url);
+        
+        // Normalize response format
+        if (Array.isArray(data)) {
+            return data;
+        } else if (data && typeof data === 'object') {
+            return data.courses || data.data || data.results || [];
+        }
+        
+        return [];
+    };
+    
+    // Get course details (try multiple ID formats)
+    const getCourseDetails = async (courseId) => {
+        if (!workingEndpoint) {
+            throw new Error('No working endpoint available for course details');
+        }
+        
+        // Try different URL patterns for getting course details
+        const detailUrls = [
+            `${workingEndpoint}/${courseId}`,
+            `${workingEndpoint.replace('/courses', '/course')}/${courseId}`,
+            `${workingEndpoint}?id=${courseId}`,
+            `${workingEndpoint}?course_id=${courseId}`
+        ];
+        
+        for (const url of detailUrls) {
+            try {
+                console.log(`🔍 Trying course details URL: ${url}`);
+                const details = await makeAPIRequest(url);
+                console.log(`✅ Got course details from: ${url}`);
+                return details;
+            } catch (error) {
+                console.log(`❌ Failed: ${url} - ${error.message}`);
+                continue;
+            }
+        }
+        
+        throw new Error(`Could not get details for course ${courseId}`);
+    };
+    
+    // Normalize course data
     const normalizeCourseData = (course) => {
         return {
             id: course.id || course.course_id || course.courseId || 'unknown',
@@ -112,12 +217,11 @@ window.GolfAPI = (function() {
             rating: parseFloat(course.rating || course.course_rating || course.courseRating) || null,
             slope: parseInt(course.slope || course.slope_rating || course.slopeRating) || null,
             holes: course.holes || course.scorecard || course.hole_data || null,
-            // Keep raw data for debugging
             _raw: course
         };
     };
     
-    // Main search function: search + get details
+    // Main search function
     const searchCourses = async (searchQuery) => {
         if (!searchQuery || !searchQuery.trim()) {
             throw new Error('Search query is required');
@@ -133,119 +237,94 @@ window.GolfAPI = (function() {
         }
         
         try {
-            // Step 1: Search for course IDs
-            console.log(`🔍 Step 1: Searching for "${searchQuery}"`);
-            const searchResults = await searchCourseIds(searchQuery);
+            console.log(`🔍 Searching for: "${searchQuery}"`);
+            
+            // Try to search using API
+            const searchResults = await searchWithWorkingEndpoint(searchQuery);
             
             if (!searchResults || searchResults.length === 0) {
-                console.log('🎯 No courses found in search, using fallback data');
-                const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
-                saveToCache(cacheKey, fallbackCourses);
-                return fallbackCourses;
+                console.log('🎯 No courses found in API search');
+                throw new Error('No courses found');
             }
             
-            // Step 2: Get details for each course (limit to first 10 for performance)
-            console.log(`📖 Step 2: Getting details for ${Math.min(searchResults.length, 10)} courses`);
-            const courseDetailsPromises = searchResults
-                .slice(0, 10) // Limit to first 10 results
-                .map(async (course) => {
+            console.log(`📖 Processing ${searchResults.length} search results`);
+            
+            // Process results - try to get details if needed
+            const processedCourses = await Promise.all(
+                searchResults.slice(0, 10).map(async (course) => {
                     try {
-                        // If the search already returned full details, use them
-                        if (course.name && course.city) {
-                            console.log(`✅ Course ${course.id} already has details from search`);
+                        // If course already has sufficient details, use it
+                        if (course.name && course.city && course.name !== 'Unknown Course') {
                             return normalizeCourseData(course);
                         }
                         
-                        // Otherwise, fetch full details
+                        // Otherwise try to get more details
                         const courseId = course.id || course.course_id || course.courseId;
-                        if (!courseId) {
-                            console.warn('⚠️ Course missing ID:', course);
-                            return null;
+                        if (courseId) {
+                            try {
+                                const details = await getCourseDetails(courseId);
+                                return normalizeCourseData(details);
+                            } catch (detailError) {
+                                console.log(`⚠️ Could not get details for ${courseId}, using basic info`);
+                                return normalizeCourseData(course);
+                            }
                         }
                         
-                        const details = await getCourseDetails(courseId);
-                        return normalizeCourseData(details);
+                        return normalizeCourseData(course);
                     } catch (error) {
-                        console.error(`❌ Failed to get course details:`, error);
-                        // Return partial data if available
-                        if (course.name) {
-                            return normalizeCourseData(course);
-                        }
+                        console.error(`❌ Error processing course:`, error);
                         return null;
                     }
-                });
+                })
+            );
             
-            // Wait for all course details
-            const courseDetails = await Promise.all(courseDetailsPromises);
-            
-            // Filter out null results and courses without names
-            const validCourses = courseDetails.filter(course => 
+            // Filter out null results
+            const validCourses = processedCourses.filter(course => 
                 course && course.name && course.name !== 'Unknown Course'
             );
             
-            console.log(`🏆 Retrieved ${validCourses.length} valid courses`);
+            console.log(`🏆 Successfully processed ${validCourses.length} courses`);
             
             if (validCourses.length > 0) {
                 saveToCache(cacheKey, validCourses);
                 return validCourses;
-            } else {
-                console.log('🎯 No valid course details retrieved, using fallback data');
-                const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
-                saveToCache(cacheKey, fallbackCourses);
-                return fallbackCourses;
             }
+            
+            throw new Error('No valid courses after processing');
             
         } catch (error) {
-            console.error('❌ API search completely failed:', error.message);
+            console.error('❌ API search failed:', error.message);
             
-            // Check if it's an authentication error
-            if (error.message.includes('401') || error.message.includes('key')) {
-                console.error('🔑 API key issue detected');
-            }
-            
-            // Always fall back to curated data on any error
-            console.log('🎯 Using fallback data due to API error');
+            // Fall back to curated data
+            console.log('🎯 Using curated fallback data');
             const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
             saveToCache(cacheKey, fallbackCourses);
             return fallbackCourses;
         }
     };
     
-    // Test API connectivity and authentication
+    // Test API connectivity with endpoint discovery
     const testConnection = async () => {
         try {
-            console.log('🧪 Testing API connection...');
+            console.log('🧪 Testing API connection with endpoint discovery...');
             
-            // Test with a simple search
-            const testQuery = 'Pebble Beach';
-            const searchResults = await searchCourseIds(testQuery);
+            const discovery = await discoverWorkingEndpoint('Pebble Beach');
             
-            if (searchResults && searchResults.length > 0) {
-                // Try to get details for first course
-                const firstCourse = searchResults[0];
-                const courseId = firstCourse.id || firstCourse.course_id || firstCourse.courseId;
-                
-                if (courseId) {
-                    const details = await getCourseDetails(courseId);
-                    return {
-                        connected: true,
-                        message: `API working! Found ${searchResults.length} courses, retrieved details for "${details.name || 'Unknown'}"`,
-                        searchResults: searchResults.length,
-                        sampleCourse: details.name || 'Unknown'
-                    };
-                } else {
-                    return {
-                        connected: true,
-                        message: `API search working but courses missing IDs. Found ${searchResults.length} courses.`,
-                        searchResults: searchResults.length,
-                        issue: 'Missing course IDs'
-                    };
-                }
+            if (discovery) {
+                return {
+                    connected: true,
+                    message: `API working! Found endpoint: ${discovery.endpoint}`,
+                    endpoint: discovery.endpoint,
+                    paramFormat: discovery.paramFormat,
+                    sampleCourses: discovery.sampleData.length,
+                    sampleData: discovery.sampleData
+                };
             } else {
                 return {
                     connected: false,
-                    message: 'API search returned no results',
-                    searchResults: 0
+                    message: 'No working API endpoints found',
+                    testedEndpoints: ENDPOINT_VARIATIONS.length,
+                    testedParams: SEARCH_PARAM_FORMATS.length
                 };
             }
         } catch (error) {
@@ -257,24 +336,11 @@ window.GolfAPI = (function() {
         }
     };
     
-    // Debug function to test search without details
-    const debugSearch = async (searchQuery) => {
-        try {
-            const searchResults = await searchCourseIds(searchQuery);
-            console.log('🔍 Raw search results:', searchResults);
-            return {
-                success: true,
-                count: searchResults.length,
-                results: searchResults,
-                sampleIds: searchResults.slice(0, 3).map(c => c.id || c.course_id || c.courseId)
-            };
-        } catch (error) {
-            console.error('❌ Debug search failed:', error);
-            return {
-                success: false,
-                error: error.message
-            };
-        }
+    // Reset endpoint discovery
+    const resetEndpointDiscovery = () => {
+        workingEndpoint = null;
+        workingParamFormat = null;
+        console.log('🔄 Reset endpoint discovery cache');
     };
     
     // Public API
@@ -282,14 +348,17 @@ window.GolfAPI = (function() {
         searchCourses,
         getCourseDetails,
         testConnection,
-        debugSearch,
+        discoverWorkingEndpoint,
+        resetEndpointDiscovery,
         clearCache: () => {
             cache.clear();
             console.log('🧹 API cache cleared');
         },
         getCacheStats: () => ({
             size: cache.size,
-            entries: Array.from(cache.keys())
+            entries: Array.from(cache.keys()),
+            workingEndpoint,
+            workingParamFormat
         })
     };
 })();
