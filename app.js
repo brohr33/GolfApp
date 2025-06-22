@@ -21,7 +21,7 @@
     
     // Check if all React components are loaded
     const checkComponents = () => {
-        const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens'];
+        const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens', 'Skins'];
         const missing = [];
         
         for (const component of requiredComponents) {
@@ -94,6 +94,10 @@
                 const [tensSelections, setTensSelections] = useState({});
                 const [playTens, setPlayTens] = useState(false);
                 
+                // New Skins game state
+                const [playSkins, setPlaySkins] = useState(false);
+                const [skinsMode, setSkinsMode] = useState('push'); // 'push', 'carryover', 'null'
+                
                 // Initialize players when count changes
                 useEffect(() => {
                     const newPlayers = Array.from({ length: numPlayers }, (_, i) => 
@@ -109,6 +113,8 @@
                         setStep(savedData.step || 'setup');
                         setPlayers(savedData.players || players);
                         setPlayTens(savedData.playTens || false);
+                        setPlaySkins(savedData.playSkins || false);
+                        setSkinsMode(savedData.skinsMode || 'push');
                         if (savedData.selectedCourse) setSelectedCourse(savedData.selectedCourse);
                         if (savedData.scores) setScores(savedData.scores);
                         if (savedData.tensSelections) setTensSelections(savedData.tensSelections);
@@ -121,12 +127,14 @@
                         step,
                         players,
                         playTens,
+                        playSkins,
+                        skinsMode,
                         selectedCourse,
                         scores,
                         tensSelections
                     };
                     GolfUtils.saveToStorage('current-round', dataToSave);
-                }, [step, players, playTens, selectedCourse, scores, tensSelections]);
+                }, [step, players, playTens, playSkins, skinsMode, selectedCourse, scores, tensSelections]);
                 
                 // Course search with API integration
                 const searchCourses = async () => {
@@ -210,6 +218,9 @@
                     setSelectedCourse(null);
                     setCourses([]);
                     setSearchQuery('');
+                    setPlayTens(false);
+                    setPlaySkins(false);
+                    setSkinsMode('push');
                     GolfUtils.saveToStorage('current-round', null);
                 };
                 
@@ -222,6 +233,10 @@
                         setPlayers,
                         playTens,
                         setPlayTens,
+                        playSkins,
+                        setPlaySkins,
+                        skinsMode,
+                        setSkinsMode,
                         onContinue: () => setStep('course-search')
                     });
                 }
@@ -245,6 +260,8 @@
                         scores,
                         tensSelections,
                         playTens,
+                        playSkins,
+                        skinsMode,
                         onUpdateScore: updateScore,
                         onToggleTens: toggleTensSelection,
                         onBack: () => setStep('course-search'),
