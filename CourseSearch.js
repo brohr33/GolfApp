@@ -1,4 +1,4 @@
-// Course Search Component
+// Course Search Component with Smart API Handling
 window.CourseSearch = (function() {
     'use strict';
     
@@ -34,26 +34,25 @@ window.CourseSearch = (function() {
             return info;
         };
         
-        const isLiveApiData = (course) => {
+        const getDataSourceInfo = (course) => {
             try {
-                // Safely check for API vs fallback data
-                if (!course) return false;
+                const courseId = course?.id || course?.course_id || course?.courseId || '';
+                const courseIdStr = String(courseId).toLowerCase();
                 
-                const courseId = course.id || course.course_id || course.courseId || '';
-                const courseIdStr = String(courseId);
-                
-                // Check if it's fallback data
-                return !courseIdStr.toLowerCase().includes('fallback') && 
-                       !courseIdStr.toLowerCase().includes('sample');
+                if (courseIdStr.includes('fallback') || courseIdStr.includes('sample')) {
+                    return { type: 'fallback', label: 'Curated data' };
+                } else if (courseId.startsWith('api-') || courseId.includes('api')) {
+                    return { type: 'api', label: 'Live API data' };
+                } else {
+                    return { type: 'api', label: 'Live data' };
+                }
             } catch (error) {
-                console.warn('Error checking data source:', error);
-                return false;
+                return { type: 'unknown', label: 'Course data' };
             }
         };
         
         const normalizeCourse = (course, index) => {
             try {
-                // Safely normalize course data with extensive fallbacks
                 return {
                     id: course?.id || course?.course_id || course?.courseId || `course-${index}`,
                     name: course?.name || course?.course_name || course?.courseName || course?.title || `Course ${index + 1}`,
@@ -68,7 +67,6 @@ window.CourseSearch = (function() {
                 };
             } catch (error) {
                 console.warn('Error normalizing course:', error);
-                // Return a safe default course
                 return {
                     id: `course-${index}`,
                     name: `Course ${index + 1}`,
@@ -83,6 +81,28 @@ window.CourseSearch = (function() {
                 };
             }
         };
+        
+        // Determine what type of results we have
+        const getResultsInfo = () => {
+            if (!courses || courses.length === 0) return null;
+            
+            const fallbackCount = courses.filter(course => {
+                const sourceInfo = getDataSourceInfo(course);
+                return sourceInfo.type === 'fallback';
+            }).length;
+            
+            const apiCount = courses.length - fallbackCount;
+            
+            if (fallbackCount > 0 && apiCount === 0) {
+                return { type: 'fallback', message: 'Showing curated course data' };
+            } else if (apiCount > 0 && fallbackCount === 0) {
+                return { type: 'api', message: 'Showing live API results' };
+            } else {
+                return { type: 'mixed', message: 'Showing mixed results' };
+            }
+        };
+        
+        const resultsInfo = getResultsInfo();
         
         return e('div', null,
             // Header
@@ -118,17 +138,26 @@ window.CourseSearch = (function() {
                     )
                 ),
                 
-                // API status
-                e('div', { className: 'status status-success' },
-                    e('strong', null, '🔗 API Connected: '), 
-                    'Successfully connected to Golf Course API'
+                // Dynamic API status based on results
+                resultsInfo && e('div', { 
+                    className: `status ${resultsInfo.type === 'fallback' ? 'status-info' : 'status-success'}` 
+                },
+                    resultsInfo.type === 'fallback' ? 
+                        e('span', null,
+                            e('strong', null, '🎯 Smart Results: '), 
+                            'API returned non-relevant results, showing curated course data instead'
+                        ) :
+                        e('span', null,
+                            e('strong', null, '🔗 API Connected: '), 
+                            resultsInfo.message
+                        )
                 ),
                 
                 // Search suggestions
                 !searchQuery && e('div', { className: 'mt-4' },
-                    e('p', { className: 'text-sm text-gray-600 mb-2' }, 'Popular searches:'),
+                    e('p', { className: 'text-sm text-gray-600 mb-2' }, 'Try these famous courses:'),
                     e('div', { className: 'flex flex-wrap gap-2' },
-                        ['Pebble Beach', 'Augusta National', 'St Andrews', 'Bethpage Black'].map(suggestion =>
+                        ['Pebble Beach', 'Augusta National', 'St Andrews', 'Bethpage Black', 'Torrey Pines'].map(suggestion =>
                             e('button', {
                                 key: suggestion,
                                 onClick: () => setSearchQuery(suggestion),
@@ -142,12 +171,18 @@ window.CourseSearch = (function() {
             
             // Search results
             (courses && courses.length > 0) && e('div', null,
-                e('h2', { className: 'text-2xl font-bold mb-4' }, 
-                    `Found ${courses.length} Course${courses.length !== 1 ? 's' : ''}`
+                e('div', { className: 'flex-between mb-4' },
+                    e('h2', { className: 'text-2xl font-bold' }, 
+                        `Found ${courses.length} Course${courses.length !== 1 ? 's' : ''}`
+                    ),
+                    searchQuery && e('div', { className: 'text-sm text-gray-600' },
+                        `Results for "${searchQuery}"`
+                    )
                 ),
+                
                 courses.map((course, index) => {
                     const safeCourse = normalizeCourse(course, index);
-                    const dataSource = isLiveApiData(safeCourse) ? 'Live API data' : 'Sample data';
+                    const sourceInfo = getDataSourceInfo(safeCourse);
                     
                     return e('div', { 
                         key: safeCourse.id, 
@@ -176,8 +211,13 @@ window.CourseSearch = (function() {
                                         }, info)
                                     )
                                 ),
-                                e('div', { className: 'text-xs text-gray-500 mt-2' },
-                                    `18 holes • ${dataSource}`
+                                e('div', { 
+                                    className: 'text-xs mt-2',
+                                    style: { 
+                                        color: sourceInfo.type === 'fallback' ? '#7c3aed' : '#059669' 
+                                    }
+                                },
+                                    `18 holes • ${sourceInfo.label}`
                                 )
                             ),
                             e('div', { className: 'btn' }, '⛳ Select →')
@@ -191,7 +231,7 @@ window.CourseSearch = (function() {
                 e('div', { style: { fontSize: '3rem', marginBottom: '1rem' } }, '🔍'),
                 e('h3', { className: 'text-xl font-semibold mb-2' }, 'No courses found'),
                 e('p', { className: 'text-gray-600 mb-4' }, 
-                    `We couldn't find any courses matching "${searchQuery}". Try a different search term.`
+                    `We couldn't find any courses matching "${searchQuery}". Try a different search term or check spelling.`
                 ),
                 e('button', {
                     onClick: () => setSearchQuery(''),
