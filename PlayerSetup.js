@@ -10,7 +10,11 @@ window.PlayerSetup = (function() {
         players, 
         setPlayers, 
         playTens, 
-        setPlayTens, 
+        setPlayTens,
+        playSkins,
+        setPlaySkins,
+        skinsMode,
+        setSkinsMode,
         onContinue 
     }) {
         
@@ -26,6 +30,24 @@ window.PlayerSetup = (function() {
             );
         };
         
+        const getSkinsModeName = (mode) => {
+            switch(mode) {
+                case 'push': return 'Push';
+                case 'carryover': return 'Carryover';
+                case 'null': return 'Null';
+                default: return 'Push';
+            }
+        };
+        
+        const getSkinsDescription = (mode) => {
+            switch(mode) {
+                case 'push': return 'Tied holes have no winner (skin is lost)';
+                case 'carryover': return 'Tied holes carry skin value to next hole';
+                case 'null': return 'Tied holes have no winner, no carryover';
+                default: return 'Tied holes have no winner (skin is lost)';
+            }
+        };
+        
         return e('div', { className: 'card' },
             e('div', { className: 'text-center mb-8' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '⛳'),
@@ -34,7 +56,7 @@ window.PlayerSetup = (function() {
             ),
             
             e('div', { className: 'grid gap-6' },
-                // Number of Players Selection - Updated to buttons
+                // Number of Players Selection
                 e('div', null,
                     e('label', { className: 'block font-semibold mb-3' }, '👥 Number of Players'),
                     e('div', { className: 'grid grid-4 gap-3' },
@@ -108,6 +130,52 @@ window.PlayerSetup = (function() {
                     )
                 ),
                 
+                // Skins Game Toggle and Mode Selection
+                e('div', { 
+                    className: 'card', 
+                    style: { background: '#fed7aa', border: '2px solid #ea580c' } 
+                },
+                    e('div', { className: 'flex-between mb-4' },
+                        e('div', null,
+                            e('h3', { className: 'font-semibold text-lg mb-1' }, '🎯 Skins Game'),
+                            e('p', { className: 'text-gray-600' }, 'Lowest net score wins each hole')
+                        ),
+                        e('div', {
+                            className: `toggle ${playSkins ? 'active skins' : ''}`,
+                            onClick: () => setPlaySkins(!playSkins)
+                        },
+                            e('div', { className: 'toggle-thumb' })
+                        )
+                    ),
+                    
+                    // Skins mode selection (only show when skins is enabled)
+                    playSkins && e('div', null,
+                        e('label', { className: 'block font-medium mb-3' }, 'Tie Handling Mode:'),
+                        e('div', { className: 'grid grid-3 gap-3' },
+                            ['push', 'carryover', 'null'].map(mode => 
+                                e('button', {
+                                    key: mode,
+                                    onClick: () => setSkinsMode(mode),
+                                    className: `btn ${skinsMode === mode ? '' : 'btn-secondary'}`,
+                                    style: { 
+                                        padding: '8px 12px',
+                                        fontSize: '13px',
+                                        fontWeight: skinsMode === mode ? '600' : '500'
+                                    }
+                                }, getSkinsModeName(mode))
+                            )
+                        ),
+                        e('div', { 
+                            className: 'mt-3 text-sm text-gray-700',
+                            style: { 
+                                background: 'rgba(255, 255, 255, 0.7)', 
+                                padding: '8px 12px', 
+                                borderRadius: '6px' 
+                            }
+                        }, getSkinsDescription(skinsMode))
+                    )
+                ),
+                
                 // Continue Button
                 e('button', {
                     onClick: onContinue,
@@ -117,10 +185,18 @@ window.PlayerSetup = (function() {
                 }, '🔍 Find Golf Course →')
             ),
             
-            // Game of Tens Info
-            playTens && e('div', { className: 'status status-info mt-4' },
-                e('strong', null, 'Game of Tens: '),
-                'Each player will select their best 10 holes after the round. Only those holes count towards the Tens competition!'
+            // Game Info
+            (playTens || playSkins) && e('div', { className: 'status status-info mt-4' },
+                playTens && playSkins ? e('div', null,
+                    e('strong', null, 'Multiple Games: '),
+                    'Playing both Game of Tens and Skins! You\'ll have multiple ways to compete.'
+                ) : playTens ? e('div', null,
+                    e('strong', null, 'Game of Tens: '),
+                    'Each player will select their best 10 holes after the round.'
+                ) : e('div', null,
+                    e('strong', null, 'Skins Game: '),
+                    `Lowest net score wins each hole. Ties are ${skinsMode === 'push' ? 'pushed (no winner)' : skinsMode === 'carryover' ? 'carried over to next hole' : 'nullified (no winner, no carryover)'}.`
+                )
             )
         );
     };
