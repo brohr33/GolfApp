@@ -8,9 +8,12 @@
   <meta name="Generator" content="Cocoa HTML Writer">
   <meta name="CocoaVersion" content="2575.4">
   <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #000000; -webkit-text-stroke: #9ca3b2; background-color: #ffffff; background-color: rgba(255, 255, 255, 0)}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #000000; -webkit-text-stroke: #9ca3b2}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
     span.s1 {font-kerning: none}
+    span.s2 {font-kerning: none; background-color: rgba(255, 255, 255, 0)}
   </style>
 </head>
 <body>
@@ -18,643 +21,644 @@
 <p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
 <p class="p1"><span class="s1">&lt;head&gt;</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;</span></p>
 <p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;title&gt;Golf Scorecard App&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="root"&gt;&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script type="text/babel"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const { useState, useEffect } = React;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const { Search, Users, Target, Trophy } = lucide;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const GolfScorecardApp = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [step, setStep] = useState('setup');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [numPlayers, setNumPlayers] = useState(1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [players, setPlayers] = useState([{ name: '', handicap: 0 }]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [courses, setCourses] = useState([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [selectedCourse, setSelectedCourse] = useState(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [searchQuery, setSearchQuery] = useState('');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [loading, setLoading] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [scores, setScores] = useState({});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [tensSelections, setTensSelections] = useState({});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [playTens, setPlayTens] = useState(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const [courseCache, setCourseCache] = useState({});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Initialize players when number changes</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const newPlayers = Array.from({ length: numPlayers }, (_, i) =&gt;<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>players[i] || { name: `Player ${i + 1}`, handicap: 0 }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setPlayers(newPlayers);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}, [numPlayers]);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>// Search courses with API integration</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const searchCourses = async () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!searchQuery.trim()) return;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const cacheKey = searchQuery.toLowerCase().trim();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (courseCache[cacheKey]) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>console.log('Using cached results for:', searchQuery);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setCourses(courseCache[cacheKey]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setLoading(true);</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const endpoints = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/courses?search=${encodeURIComponent(searchQuery)}`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/v1/courses?q=${encodeURIComponent(searchQuery)}`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/search?name=${encodeURIComponent(searchQuery)}`</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>];</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>let apiResponse = null;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>for (const endpoint of endpoints) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>console.log(`Trying API endpoint: ${endpoint}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>const response = await fetch(endpoint, {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>method: 'GET',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>headers: {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>'Authorization': 'Key VLNANFMEVIQBJ6T75A52WMQUKI',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>'Content-Type': 'application/json',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>'Accept': 'application/json'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>});</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>if (response.ok) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>apiResponse = await response.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>console.log('API Success:', apiResponse);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>break;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>} catch (error) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>console.log(`Endpoint failed:`, error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>continue;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (apiResponse &amp;&amp; apiResponse.courses) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>setCourses(apiResponse.courses);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>setCourseCache(prev =&gt; ({ ...prev, [cacheKey]: apiResponse.courses }));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>throw new Error('No valid API response');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} catch (error) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>console.error('API failed, using fallback:', error);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const fallbackCourses = generateFallbackCourses(searchQuery);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setCourses(fallbackCourses);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>setCourseCache(prev =&gt; ({ ...prev, [`${cacheKey}_fallback`]: fallbackCourses }));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setLoading(false);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const generateFallbackCourses = (query) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const searchLower = query.toLowerCase();</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (searchLower.includes('pebble')) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return [{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>id: 'pebble-beach',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>name: 'Pebble Beach Golf Links',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>city: 'Pebble Beach',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>state: 'CA',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>par: 72,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>holes: generatePebbleBeachHoles()</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else if (searchLower.includes('augusta')) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return [{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>id: 'augusta-national',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>name: 'Augusta National Golf Club',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>city: 'Augusta',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>state: 'GA',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>par: 72,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>holes: generateAugustaNationalHoles()</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>id: `${query.replace(/\s+/g, '-').toLowerCase()}-gc`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>name: `${query} Golf Club`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>city: 'Sample City',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>state: 'CA',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>par: 72,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>holes: generateDefaultHoles(72)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>id: `${query.replace(/\s+/g, '-').toLowerCase()}-cc`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>name: `${query} Country Club`,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>city: 'Sample Town',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>state: 'TX',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>par: 71,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>holes: generateDefaultHoles(71)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const generateDefaultHoles = (totalPar) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return Array.from({ length: 18 }, (_, i) =&gt; ({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>hole: i + 1,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>par: i % 6 === 0 ? 5 : i % 4 === 0 ? 3 : 4,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>yardage: 150 + Math.floor(Math.random() * 400),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>handicap: i + 1</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const generatePebbleBeachHoles = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 1, par: 4, yardage: 381, handicap: 11 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 2, par: 5, yardage: 502, handicap: 13 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 3, par: 4, yardage: 390, handicap: 9 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 4, par: 4, yardage: 331, handicap: 15 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 5, par: 3, yardage: 188, handicap: 17 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 6, par: 5, yardage: 513, handicap: 5 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 7, par: 3, yardage: 106, handicap: 7 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 8, par: 4, yardage: 418, handicap: 1 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 9, par: 4, yardage: 464, handicap: 3 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 10, par: 4, yardage: 446, handicap: 6 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 11, par: 4, yardage: 390, handicap: 14 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 12, par: 3, yardage: 202, handicap: 16 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 13, par: 4, yardage: 399, handicap: 8 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 14, par: 5, yardage: 572, handicap: 2 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 15, par: 4, yardage: 397, handicap: 12 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 16, par: 4, yardage: 402, handicap: 10 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 17, par: 3, yardage: 178, handicap: 18 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 18, par: 5, yardage: 543, handicap: 4 }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const generateAugustaNationalHoles = () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 1, par: 4, yardage: 445, handicap: 10 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 2, par: 5, yardage: 575, handicap: 16 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 3, par: 4, yardage: 350, handicap: 14 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 4, par: 3, yardage: 240, handicap: 6 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 5, par: 4, yardage: 495, handicap: 2 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 6, par: 3, yardage: 180, handicap: 18 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 7, par: 4, yardage: 450, handicap: 12 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 8, par: 5, yardage: 570, handicap: 8 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 9, par: 4, yardage: 460, handicap: 4 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 10, par: 4, yardage: 495, handicap: 1 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 11, par: 4, yardage: 520, handicap: 3 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 12, par: 3, yardage: 155, handicap: 17 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 13, par: 5, yardage: 510, handicap: 9 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 14, par: 4, yardage: 440, handicap: 11 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 15, par: 5, yardage: 550, handicap: 5 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 16, par: 3, yardage: 170, handicap: 15 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 17, par: 4, yardage: 440, handicap: 13 },</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 18, par: 4, yardage: 465, handicap: 7 }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const selectCourse = (course) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setSelectedCourse(course);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initialScores = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const initialTensSelections = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>players.forEach((player, playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>initialScores[playerIndex] = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>initialTensSelections[playerIndex] = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>course.holes.forEach(hole =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>initialScores[playerIndex][hole.hole] = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>initialTensSelections[playerIndex][hole.hole] = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setScores(initialScores);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setTensSelections(initialTensSelections);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setStep('scorecard');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const updateScore = (playerIndex, hole, score) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setScores(prev =&gt; ({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>...prev,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>[playerIndex]: {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>...prev[playerIndex],</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>[hole]: score</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const calculateTotal = (playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return selectedCourse.holes.reduce((total, hole) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const score = parseInt(scores[playerIndex]?.[hole.hole]) || 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return total + score;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}, 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const getStrokesForHole = (playerIndex, holeHandicap) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const playerHandicap = players[playerIndex]?.handicap || 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (playerHandicap &lt;= 0) return 0;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const strokesPerHole = Math.floor(playerHandicap / 18);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const extraStrokes = playerHandicap % 18;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let strokes = strokesPerHole;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (holeHandicap &lt;= extraStrokes) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>strokes += 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return strokes;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const calculateNetScore = (playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return 0;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let netScore = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>selectedCourse.holes.forEach(hole =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>const score = parseInt(scores[playerIndex]?.[hole.hole]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (score &amp;&amp; score &gt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>netScore += score - strokes;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return netScore;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const toggleTensSelection = (playerIndex, hole) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const currentSelections = tensSelections[playerIndex] || {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>const selectedCount = Object.values(currentSelections).filter(Boolean).length;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!currentSelections[hole] &amp;&amp; selectedCount &gt;= 10) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>setTensSelections(prev =&gt; ({</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>...prev,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>[playerIndex]: {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>...prev[playerIndex],</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>[hole]: !prev[playerIndex][hole]</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const calculateTensScore = (playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return { netScore: 0, selectedHoles: 0, parTotal: 0 };</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let netScore = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let selectedHoles = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>let parTotal = 0;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>selectedCourse.holes.forEach(hole =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>if (tensSelections[playerIndex]?.[hole.hole]) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>selectedHoles++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>parTotal += hole.par;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>const score = parseInt(scores[playerIndex]?.[hole.hole]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>if (score &amp;&amp; score &gt; 0) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>netScore += score - strokes;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return { netScore, selectedHoles, parTotal };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'setup') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Trophy className="mx-auto mb-4 text-green-600" size={48} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;Golf Scorecard&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;Set up your round&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label className="block text-sm font-medium text-gray-700 mb-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;Users className="inline mr-2" size={16} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>Number of Players (1-4)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;select<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>value={numPlayers}<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>onChange={(e) =&gt; setNumPlayers(parseInt(e.target.value))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>{[1, 2, 3, 4].map(num =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;option key={num} value={num}&gt;{num} Player{num &gt; 1 ? 's' : ''}&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/select&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="space-y-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>{players.map((player, index) =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div key={index} className="bg-gray-50 p-4 rounded-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h3 className="font-semibold text-gray-700 mb-3"&gt;Player {index + 1}&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="grid grid-cols-2 gap-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;label className="block text-sm font-medium text-gray-600 mb-1"&gt;Name&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>type="text"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>value={player.name}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>onChange={(e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>const newPlayers = [...players];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>newPlayers[index].name = e.target.value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>setPlayers(newPlayers);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>}}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>placeholder={`Player ${index + 1}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>/&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;label className="block text-sm font-medium text-gray-600 mb-1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;Target className="inline mr-1" size={14} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>Handicap</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/label&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>type="number"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>value={player.handicap}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>onChange={(e) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>const newPlayers = [...players];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>newPlayers[index].handicap = parseInt(e.target.value) || 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>setPlayers(newPlayers);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>}}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>min="0"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>max="54"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>/&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="flex items-center justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h3 className="font-semibold text-purple-800 mb-1"&gt;Game of Tens&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;p className="text-sm text-purple-600"&gt;Enable the side game where each player selects their best 10 holes&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>onClick={() =&gt; setPlayTens(!playTens)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>playTens ? 'bg-purple-600' : 'bg-gray-300'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;span</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>playTens ? 'translate-x-6' : 'translate-x-1'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>/&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; setStep('course-search')}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>Continue to Course Selection</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'course-search') {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Search className="mx-auto mb-4 text-green-600" size={48} /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;Select Golf Course&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;Search for your course&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="mb-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="flex gap-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>type="text"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>value={searchQuery}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>onChange={(e) =&gt; setSearchQuery(e.target.value)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>placeholder="Search for golf courses (e.g., 'Pebble Beach', 'Augusta')..."</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>onKeyPress={(e) =&gt; e.key === 'Enter' &amp;&amp; searchCourses()}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>/&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>onClick={searchCourses}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>disabled={loading}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>{loading ? 'Searching...' : 'Search'}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="mt-2 text-xs text-blue-600"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;strong&gt;API Integration:&lt;/strong&gt; Using Golf Course API. Check browser console for details.</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{courses.length &gt; 0 &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="space-y-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;h2 className="text-xl font-semibold text-gray-800"&gt;Search Results&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>{courses.map(course =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="flex justify-between items-start"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div className="flex-1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;h3 className="text-lg font-semibold text-gray-800"&gt;{course.name}&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p className="text-gray-600"&gt;{course.city}, {course.state}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p className="text-sm text-gray-500"&gt;Par: {course.par}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>onClick={() =&gt; selectCourse(course)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors ml-4"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>Select Course</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>)}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>onClick={() =&gt; setStep('setup')}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>className="mt-6 text-green-600 hover:text-green-700 transition-colors"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>← Back to Player Setup</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'scorecard' &amp;&amp; selectedCourse) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;{selectedCourse.name}&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;{selectedCourse.city}, {selectedCourse.state} • Par {selectedCourse.par}&lt;/p&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="overflow-x-auto"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;table className="w-full border-collapse bg-white"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;thead&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;tr className="bg-green-100 border-b-2 border-green-200"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-left font-semibold"&gt;Hole&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;Par&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;Yards&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;HCP&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>{players.map((player, index) =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;th key={index} className="p-3 text-center font-semibold min-w-32"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>{player.name || `Player ${index + 1}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;div className="text-xs font-normal text-gray-600"&gt;HCP: {player.handicap}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/th&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/thead&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;tbody&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>{selectedCourse.holes.map((hole) =&gt; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;tr key={hole.hole} className="border-b border-gray-200 hover:bg-gray-50"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 font-semibold"&gt;{hole.hole}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.par}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.yardage}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.handicap}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>{players.map((player, playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>const isSelectedForTens = tensSelections[playerIndex]?.[hole.hole];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>const tensCount = Object.values(tensSelections[playerIndex] || {}).filter(Boolean).length;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>const canSelectForTens = isSelectedForTens || tensCount &lt; 10;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                                                </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;td key={playerIndex} className="p-3 text-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;div className="flex flex-col items-center space-y-1"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>type="number"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>value={scores[playerIndex]?.[hole.hole] || ''}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>onChange={(e) =&gt; updateScore(playerIndex, hole.hole, e.target.value)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>min="1"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>max="15"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>className="w-16 p-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>/&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>{strokes &gt; 0 &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;div className="text-xs text-blue-600 font-medium"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>{strokes} stroke{strokes &gt; 1 ? 's' : ''}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>{playTens &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>onClick={() =&gt; toggleTensSelection(playerIndex, hole.hole)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>disabled={!canSelectForTens}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>className={`text-xs px-2 py-1 rounded transition-colors ${</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                        </span>isSelectedForTens<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                            </span>? 'bg-purple-600 text-white'<span class="Apple-converted-space"> </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                            </span>: canSelectForTens</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                                </span>? 'bg-purple-100 text-purple-600 hover:bg-purple-200'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                                </span>: 'bg-gray-100 text-gray-400 cursor-not-allowed'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                    </span>{isSelectedForTens ? '✓ Tens' : 'Tens'}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>)}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>})}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>))}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;tr className="bg-green-50 border-t-2 border-green-200 font-semibold"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3"&gt;TOTAL&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;{selectedCourse.par}&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;-&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;-&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>{players.map((player, playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>const totalScore = calculateTotal(playerIndex);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>const netScore = calculateNetScore(playerIndex);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;td key={playerIndex} className="p-3 text-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div&gt;{totalScore || 0}&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="text-xs text-gray-600"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>Net: {netScore || 0}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/td&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>})}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/tr&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/tbody&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/table&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>{playTens &amp;&amp; (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="mt-8 bg-purple-50 rounded-lg p-6"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;h2 className="text-2xl font-bold text-purple-800 mb-4 text-center"&gt;Game of Tens&lt;/h2&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>{players.map((player, playerIndex) =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>const tensData = calculateTensScore(playerIndex);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>const overUnder = tensData.netScore - tensData.parTotal;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">                                        </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>return (</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div key={playerIndex} className="bg-white rounded-lg p-4 border-2 border-purple-200"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;h3 className="font-bold text-lg text-purple-800 mb-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>{player.name || `Player ${playerIndex + 1}`}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;div className="space-y-2 text-sm"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Holes Selected:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.selectedHoles}/10&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Net Score:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.netScore || 0}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Par Total:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.parTotal || 0}&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between border-t pt-2"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;vs Par:&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className={`font-bold ${</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>overUnder &gt; 0 ? 'text-red-600' : overUnder &lt; 0 ? 'text-green-600' : 'text-gray-800'</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>}`}&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                            </span>{overUnder === 0 ? 'E' : overUnder &gt; 0 ? `+${overUnder}` : overUnder}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                        </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>})}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="mt-4 text-sm text-purple-700 text-center"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>Select 10 holes for each player to count towards their Tens score. Click the "Tens" button below each score.</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>)}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="mt-8 flex justify-between"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; setStep('course-search')}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>className="text-green-600 hover:text-green-700 transition-colors"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>← Change Course</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setStep('setup');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setScores({});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setTensSelections({});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setSelectedCourse(null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                    </span>setCourses([]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>}}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                                </span>New Round</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>return null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// Render the app</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>ReactDOM.render(React.createElement(GolfScorecardApp), document.getElementById('root'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<p class="p2"><span class="s2"><span class="Apple-converted-space">    </span>&lt;title&gt;Golf Scorecard App&lt;/title&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/@babel/standalone/babel.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p3"><span class="s1">&lt;body&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="root"&gt;&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">    </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script type="text/babel"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>const { useState, useEffect } = React;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>const { Search, Users, Target, Trophy } = lucide;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>const GolfScorecardApp = () =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [step, setStep] = useState('setup');</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [numPlayers, setNumPlayers] = useState(1);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [players, setPlayers] = useState([{ name: '', handicap: 0 }]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [courses, setCourses] = useState([]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [selectedCourse, setSelectedCourse] = useState(null);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [searchQuery, setSearchQuery] = useState('');</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [loading, setLoading] = useState(false);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [scores, setScores] = useState({});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [tensSelections, setTensSelections] = useState({});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [playTens, setPlayTens] = useState(false);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const [courseCache, setCourseCache] = useState({});</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>// Initialize players when number changes</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>useEffect(() =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const newPlayers = Array.from({ length: numPlayers }, (_, i) =&gt;<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>players[i] || { name: `Player ${i + 1}`, handicap: 0 }</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setPlayers(newPlayers);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>}, [numPlayers]);</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>// Search courses with API integration</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const searchCourses = async () =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (!searchQuery.trim()) return;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const cacheKey = searchQuery.toLowerCase().trim();</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (courseCache[cacheKey]) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>console.log('Using cached results for:', searchQuery);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>setCourses(courseCache[cacheKey]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setLoading(true);</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>try {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>const endpoints = [</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/courses?search=${encodeURIComponent(searchQuery)}`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/v1/courses?q=${encodeURIComponent(searchQuery)}`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>`https://api.golfcourseapi.com/search?name=${encodeURIComponent(searchQuery)}`</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>];</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>let apiResponse = null;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>for (const endpoint of endpoints) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>try {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>console.log(`Trying API endpoint: ${endpoint}`);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>const response = await fetch(endpoint, {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>method: 'GET',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>headers: {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>'Authorization': 'Key VLNANFMEVIQBJ6T75A52WMQUKI',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>'Content-Type': 'application/json',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>'Accept': 'application/json'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>});</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                            </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>if (response.ok) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>apiResponse = await response.json();</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>console.log('API Success:', apiResponse);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>break;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>} catch (error) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>console.log(`Endpoint failed:`, error);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>continue;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>if (apiResponse &amp;&amp; apiResponse.courses) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>setCourses(apiResponse.courses);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>setCourseCache(prev =&gt; ({ ...prev, [cacheKey]: apiResponse.courses }));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>} else {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>throw new Error('No valid API response');</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                    </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>} catch (error) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>console.error('API failed, using fallback:', error);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>const fallbackCourses = generateFallbackCourses(searchQuery);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>setCourses(fallbackCourses);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>setCourseCache(prev =&gt; ({ ...prev, [`${cacheKey}_fallback`]: fallbackCourses }));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setLoading(false);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const generateFallbackCourses = (query) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const searchLower = query.toLowerCase();</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (searchLower.includes('pebble')) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return [{</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>id: 'pebble-beach',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>name: 'Pebble Beach Golf Links',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>city: 'Pebble Beach',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>state: 'CA',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>par: 72,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>holes: generatePebbleBeachHoles()</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>} else if (searchLower.includes('augusta')) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return [{</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>id: 'augusta-national',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>name: 'Augusta National Golf Club',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>city: 'Augusta',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>state: 'GA',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>par: 72,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>holes: generateAugustaNationalHoles()</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>} else {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return [</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>{</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>id: `${query.replace(/\s+/g, '-').toLowerCase()}-gc`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>name: `${query} Golf Club`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>city: 'Sample City',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>state: 'CA',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>par: 72,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>holes: generateDefaultHoles(72)</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>},</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>{</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>id: `${query.replace(/\s+/g, '-').toLowerCase()}-cc`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>name: `${query} Country Club`,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>city: 'Sample Town',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>state: 'TX',</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>par: 71,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>holes: generateDefaultHoles(71)</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const generateDefaultHoles = (totalPar) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return Array.from({ length: 18 }, (_, i) =&gt; ({</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>hole: i + 1,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>par: i % 6 === 0 ? 5 : i % 4 === 0 ? 3 : 4,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>yardage: 150 + Math.floor(Math.random() * 400),</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>handicap: i + 1</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const generatePebbleBeachHoles = () =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return [</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 1, par: 4, yardage: 381, handicap: 11 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 2, par: 5, yardage: 502, handicap: 13 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 3, par: 4, yardage: 390, handicap: 9 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 4, par: 4, yardage: 331, handicap: 15 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 5, par: 3, yardage: 188, handicap: 17 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 6, par: 5, yardage: 513, handicap: 5 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 7, par: 3, yardage: 106, handicap: 7 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 8, par: 4, yardage: 418, handicap: 1 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 9, par: 4, yardage: 464, handicap: 3 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 10, par: 4, yardage: 446, handicap: 6 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 11, par: 4, yardage: 390, handicap: 14 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 12, par: 3, yardage: 202, handicap: 16 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 13, par: 4, yardage: 399, handicap: 8 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 14, par: 5, yardage: 572, handicap: 2 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 15, par: 4, yardage: 397, handicap: 12 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 16, par: 4, yardage: 402, handicap: 10 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 17, par: 3, yardage: 178, handicap: 18 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 18, par: 5, yardage: 543, handicap: 4 }</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const generateAugustaNationalHoles = () =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return [</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 1, par: 4, yardage: 445, handicap: 10 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 2, par: 5, yardage: 575, handicap: 16 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 3, par: 4, yardage: 350, handicap: 14 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 4, par: 3, yardage: 240, handicap: 6 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 5, par: 4, yardage: 495, handicap: 2 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 6, par: 3, yardage: 180, handicap: 18 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 7, par: 4, yardage: 450, handicap: 12 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 8, par: 5, yardage: 570, handicap: 8 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 9, par: 4, yardage: 460, handicap: 4 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 10, par: 4, yardage: 495, handicap: 1 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 11, par: 4, yardage: 520, handicap: 3 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 12, par: 3, yardage: 155, handicap: 17 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 13, par: 5, yardage: 510, handicap: 9 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 14, par: 4, yardage: 440, handicap: 11 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 15, par: 5, yardage: 550, handicap: 5 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 16, par: 3, yardage: 170, handicap: 15 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 17, par: 4, yardage: 440, handicap: 13 },</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>{ hole: 18, par: 4, yardage: 465, handicap: 7 }</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const selectCourse = (course) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setSelectedCourse(course);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const initialScores = {};</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const initialTensSelections = {};</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>players.forEach((player, playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>initialScores[playerIndex] = {};</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>initialTensSelections[playerIndex] = {};</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>course.holes.forEach(hole =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>initialScores[playerIndex][hole.hole] = '';</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>initialTensSelections[playerIndex][hole.hole] = false;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setScores(initialScores);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setTensSelections(initialTensSelections);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setStep('scorecard');</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const updateScore = (playerIndex, hole, score) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setScores(prev =&gt; ({</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>...prev,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>[playerIndex]: {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>...prev[playerIndex],</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>[hole]: score</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const calculateTotal = (playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return selectedCourse.holes.reduce((total, hole) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>const score = parseInt(scores[playerIndex]?.[hole.hole]) || 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return total + score;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}, 0);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const getStrokesForHole = (playerIndex, holeHandicap) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const playerHandicap = players[playerIndex]?.handicap || 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (playerHandicap &lt;= 0) return 0;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const strokesPerHole = Math.floor(playerHandicap / 18);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const extraStrokes = playerHandicap % 18;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>let strokes = strokesPerHole;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (holeHandicap &lt;= extraStrokes) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>strokes += 1;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return strokes;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const calculateNetScore = (playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return 0;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>let netScore = 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>selectedCourse.holes.forEach(hole =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>const score = parseInt(scores[playerIndex]?.[hole.hole]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>if (score &amp;&amp; score &gt; 0) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>netScore += score - strokes;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return netScore;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const toggleTensSelection = (playerIndex, hole) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const currentSelections = tensSelections[playerIndex] || {};</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>const selectedCount = Object.values(currentSelections).filter(Boolean).length;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (!currentSelections[hole] &amp;&amp; selectedCount &gt;= 10) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>return;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>setTensSelections(prev =&gt; ({</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>...prev,</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>[playerIndex]: {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>...prev[playerIndex],</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>[hole]: !prev[playerIndex][hole]</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>}));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>const calculateTensScore = (playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>if (!selectedCourse) return { netScore: 0, selectedHoles: 0, parTotal: 0 };</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>let netScore = 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>let selectedHoles = 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>let parTotal = 0;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>selectedCourse.holes.forEach(hole =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>if (tensSelections[playerIndex]?.[hole.hole]) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>selectedHoles++;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>parTotal += hole.par;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>const score = parseInt(scores[playerIndex]?.[hole.hole]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>if (score &amp;&amp; score &gt; 0) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>netScore += score - strokes;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>});</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return { netScore, selectedHoles, parTotal };</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'setup') {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Trophy className="mx-auto mb-4 text-green-600" size={48} /&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;Golf Scorecard&lt;/h1&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;Set up your round&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="space-y-6"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;label className="block text-sm font-medium text-gray-700 mb-2"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;Users className="inline mr-2" size={16} /&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>Number of Players (1-4)</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/label&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;select<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>value={numPlayers}<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>onChange={(e) =&gt; setNumPlayers(parseInt(e.target.value))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>{[1, 2, 3, 4].map(num =&gt; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;option key={num} value={num}&gt;{num} Player{num &gt; 1 ? 's' : ''}&lt;/option&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/select&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="space-y-4"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>{players.map((player, index) =&gt; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div key={index} className="bg-gray-50 p-4 rounded-lg"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h3 className="font-semibold text-gray-700 mb-3"&gt;Player {index + 1}&lt;/h3&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="grid grid-cols-2 gap-4"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;label className="block text-sm font-medium text-gray-600 mb-1"&gt;Name&lt;/label&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;input</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>type="text"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>value={player.name}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>onChange={(e) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>const newPlayers = [...players];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>newPlayers[index].name = e.target.value;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>setPlayers(newPlayers);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>}}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>placeholder={`Player ${index + 1}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>/&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;label className="block text-sm font-medium text-gray-600 mb-1"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;Target className="inline mr-1" size={14} /&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>Handicap</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/label&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;input</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>type="number"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>value={player.handicap}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>onChange={(e) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>const newPlayers = [...players];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>newPlayers[index].handicap = parseInt(e.target.value) || 0;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>setPlayers(newPlayers);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>}}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>min="0"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>max="54"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>/&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="flex items-center justify-between"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;h3 className="font-semibold text-purple-800 mb-1"&gt;Game of Tens&lt;/h3&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;p className="text-sm text-purple-600"&gt;Enable the side game where each player selects their best 10 holes&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>onClick={() =&gt; setPlayTens(!playTens)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>playTens ? 'bg-purple-600' : 'bg-gray-300'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;span</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>playTens ? 'translate-x-6' : 'translate-x-1'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>/&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; setStep('course-search')}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors font-semibold"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>Continue to Course Selection</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'course-search') {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;Search className="mx-auto mb-4 text-green-600" size={48} /&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;Select Golf Course&lt;/h1&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;Search for your course&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="mb-6"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="flex gap-2"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;input</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>type="text"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>value={searchQuery}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>onChange={(e) =&gt; setSearchQuery(e.target.value)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>placeholder="Search for golf courses (e.g., 'Pebble Beach', 'Augusta')..."</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>className="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>onKeyPress={(e) =&gt; e.key === 'Enter' &amp;&amp; searchCourses()}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>/&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>onClick={searchCourses}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>disabled={loading}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>{loading ? 'Searching...' : 'Search'}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="mt-2 text-xs text-blue-600"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;strong&gt;API Integration:&lt;/strong&gt; Using Golf Course API. Check browser console for details.</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>{courses.length &gt; 0 &amp;&amp; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="space-y-4"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;h2 className="text-xl font-semibold text-gray-800"&gt;Search Results&lt;/h2&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>{courses.map(course =&gt; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;div key={course.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;div className="flex justify-between items-start"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div className="flex-1"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;h3 className="text-lg font-semibold text-gray-800"&gt;{course.name}&lt;/h3&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p className="text-gray-600"&gt;{course.city}, {course.state}&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;p className="text-sm text-gray-500"&gt;Par: {course.par}&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>onClick={() =&gt; selectCourse(course)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors ml-4"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>Select Course</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>)}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>onClick={() =&gt; setStep('setup')}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>className="mt-6 text-green-600 hover:text-green-700 transition-colors"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>← Back to Player Setup</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>if (step === 'scorecard' &amp;&amp; selectedCourse) {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;div className="max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-lg"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="text-center mb-8"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;h1 className="text-3xl font-bold text-gray-800 mb-2"&gt;{selectedCourse.name}&lt;/h1&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;p className="text-gray-600"&gt;{selectedCourse.city}, {selectedCourse.state} • Par {selectedCourse.par}&lt;/p&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="overflow-x-auto"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;table className="w-full border-collapse bg-white"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;thead&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;tr className="bg-green-100 border-b-2 border-green-200"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-left font-semibold"&gt;Hole&lt;/th&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;Par&lt;/th&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;Yards&lt;/th&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;th className="p-3 text-center font-semibold"&gt;HCP&lt;/th&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>{players.map((player, index) =&gt; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;th key={index} className="p-3 text-center font-semibold min-w-32"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>{player.name || `Player ${index + 1}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;div className="text-xs font-normal text-gray-600"&gt;HCP: {player.handicap}&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/th&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/tr&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/thead&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;tbody&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>{selectedCourse.holes.map((hole) =&gt; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;tr key={hole.hole} className="border-b border-gray-200 hover:bg-gray-50"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 font-semibold"&gt;{hole.hole}&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.par}&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.yardage}&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;td className="p-3 text-center"&gt;{hole.handicap}&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>{players.map((player, playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>const strokes = getStrokesForHole(playerIndex, hole.handicap);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>const isSelectedForTens = tensSelections[playerIndex]?.[hole.hole];</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>const tensCount = Object.values(tensSelections[playerIndex] || {}).filter(Boolean).length;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>const canSelectForTens = isSelectedForTens || tensCount &lt; 10;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                                </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;td key={playerIndex} className="p-3 text-center"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;div className="flex flex-col items-center space-y-1"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>&lt;input</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>type="number"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>value={scores[playerIndex]?.[hole.hole] || ''}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>onChange={(e) =&gt; updateScore(playerIndex, hole.hole, e.target.value)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>min="1"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>max="15"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>className="w-16 p-2 text-center border border-gray-300 rounded focus:ring-2 focus:ring-green-500 focus:border-transparent"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>/&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>{strokes &gt; 0 &amp;&amp; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;div className="text-xs text-blue-600 font-medium"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>{strokes} stroke{strokes &gt; 1 ? 's' : ''}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>{playTens &amp;&amp; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>onClick={() =&gt; toggleTensSelection(playerIndex, hole.hole)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>disabled={!canSelectForTens}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>className={`text-xs px-2 py-1 rounded transition-colors ${</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                        </span>isSelectedForTens<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                            </span>? 'bg-purple-600 text-white'<span class="Apple-converted-space"> </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                            </span>: canSelectForTens</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                                </span>? 'bg-purple-100 text-purple-600 hover:bg-purple-200'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                                </span>: 'bg-gray-100 text-gray-400 cursor-not-allowed'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                    </span>{isSelectedForTens ? '✓ Tens' : 'Tens'}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                                </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>)}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>})}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;/tr&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>))}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;tr className="bg-green-50 border-t-2 border-green-200 font-semibold"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3"&gt;TOTAL&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;{selectedCourse.par}&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;-&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>&lt;td className="p-3 text-center"&gt;-&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>{players.map((player, playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>const totalScore = calculateTotal(playerIndex);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>const netScore = calculateNetScore(playerIndex);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;td key={playerIndex} className="p-3 text-center"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div&gt;{totalScore || 0}&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="text-xs text-gray-600"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>Net: {netScore || 0}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/td&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>})}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>&lt;/tr&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/tbody&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/table&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>{playTens &amp;&amp; (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;div className="mt-8 bg-purple-50 rounded-lg p-6"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;h2 className="text-2xl font-bold text-purple-800 mb-4 text-center"&gt;Game of Tens&lt;/h2&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>{players.map((player, playerIndex) =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>const tensData = calculateTensScore(playerIndex);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>const overUnder = tensData.netScore - tensData.parTotal;</span></p>
+<p class="p4"><span class="s1"><span class="Apple-converted-space">                                        </span></span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>return (</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;div key={playerIndex} className="bg-white rounded-lg p-4 border-2 border-purple-200"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;h3 className="font-bold text-lg text-purple-800 mb-2"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>{player.name || `Player ${playerIndex + 1}`}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/h3&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;div className="space-y-2 text-sm"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Holes Selected:&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.selectedHoles}/10&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Net Score:&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.netScore || 0}&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;Par Total:&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="font-semibold"&gt;{tensData.parTotal || 0}&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;div className="flex justify-between border-t pt-2"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className="text-gray-600"&gt;vs Par:&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;span className={`font-bold ${</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>overUnder &gt; 0 ? 'text-red-600' : overUnder &lt; 0 ? 'text-green-600' : 'text-gray-800'</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>}`}&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                            </span>{overUnder === 0 ? 'E' : overUnder &gt; 0 ? `+${overUnder}` : overUnder}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                        </span>&lt;/span&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                                </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                        </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>})}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;div className="mt-4 text-sm text-purple-700 text-center"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>Select 10 holes for each player to count towards their Tens score. Click the "Tens" button below each score.</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>)}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;div className="mt-8 flex justify-between"&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; setStep('course-search')}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>className="text-green-600 hover:text-green-700 transition-colors"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>← Change Course</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;button</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>onClick={() =&gt; {</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>setStep('setup');</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>setScores({});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>setTensSelections({});</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>setSelectedCourse(null);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                    </span>setCourses([]);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>}}</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition-colors"</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                                </span>New Round</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                            </span>&lt;/button&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">                </span>);</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>}</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">            </span>return null;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>};</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>// Render the app</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span>ReactDOM.render(React.createElement(GolfScorecardApp), document.getElementById('root'));</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p3"><span class="s1">&lt;/html&gt;</span></p>
 </body>
 </html>
