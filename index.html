@@ -1,53 +1,84 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golf Scorecard Pro - Professional Golf Scoring</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.4">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Apple Color Emoji'; -webkit-text-stroke: #000000}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Apple Color Emoji'; -webkit-text-stroke: #000000; min-height: 20.0px}
+    p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 12.0px}
+    p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; color: #88b966; -webkit-text-stroke: #88b966}
+    span.s1 {font-kerning: none}
+    span.s2 {font: 12.0px 'Apple Color Emoji'; font-kerning: none}
+    span.s3 {font: 12.0px Helvetica; font-kerning: none}
+    span.s4 {font-kerning: none; color: #9ba2b1; -webkit-text-stroke: 0px #9ba2b1}
+    span.s5 {font-kerning: none; color: #d65562; -webkit-text-stroke: 0px #d65562}
+    span.s6 {font-kerning: none; color: #000000; -webkit-text-stroke: 0px #000000}
+    span.s7 {font-kerning: none; color: #4a505d; -webkit-text-stroke: 0px #4a505d}
+    span.s8 {font-kerning: none; color: #519deb; -webkit-text-stroke: 0px #519deb}
+    span.s9 {font-kerning: none; color: #c58853; -webkit-text-stroke: 0px #c58853}
+    span.s10 {font-kerning: none; color: #b85dd5; -webkit-text-stroke: 0px #b85dd5}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Loading State -->
-        <div id="loading" class="card text-center">
-            <div class="text-3xl mb-4">⛳ Golf Scorecard Pro</div>
-            <div class="flex justify-center mb-4">
-                <div class="spinner"></div>
-            </div>
-            <div id="loadStatus" class="status status-info">Initializing application...</div>
-        </div>
-        
-        <!-- Main Application -->
-        <div id="app" class="hidden"></div>
-        
-        <!-- Error State -->
-        <div id="error" class="hidden">
-            <div class="card text-center">
-                <div class="text-3xl mb-4">⛳ Golf Scorecard Pro</div>
-                <div class="status status-error mb-6">
-                    <strong>Application Error</strong><br>
-                    There was a problem loading the application. Please try refreshing the page.
-                </div>
-                <button class="btn" onclick="location.reload()">
-                    🔄 Refresh Page
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- External Dependencies -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-    <!-- Application Modules - Load in correct order -->
-    <script src="utils.js"></script>
-    <script src="scoring.js"></script>
-    <script src="courseData.js"></script>
-    <script src="api.js"></script>
-    <script src="PlayerSetup.js"></script>
-    <script src="CourseSearch.js"></script>
-    <script src="GameOfTens.js"></script>
-    <script src="Scorecard.js"></script>
-    <script src="app.js"></script>
+<p class="p1"><span class="s1">&lt;!DOCTYPE</span><span class="s2"> </span><span class="s1">html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html</span><span class="s2"> </span><span class="s1">lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;meta</span><span class="s2"> </span><span class="s1">charset="UTF-</span><span class="s2">8</span><span class="s1">"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;meta</span><span class="s2"> </span><span class="s1">name="viewport"</span><span class="s2"> </span><span class="s1">content="width=device-width,</span><span class="s2"> </span><span class="s1">initial-scale=</span><span class="s2">1</span><span class="s1">.</span><span class="s2">0</span><span class="s1">"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;title&gt;Golf</span><span class="s2"> </span><span class="s1">Scorecard</span><span class="s2"> </span><span class="s1">Pro</span><span class="s2"> </span><span class="s1">-</span><span class="s2"> </span><span class="s1">Professional</span><span class="s2"> </span><span class="s1">Golf</span><span class="s2"> </span><span class="s1">Scoring&lt;/title&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;link</span><span class="s2"> </span><span class="s1">rel="stylesheet"</span><span class="s2"> </span><span class="s1">href="styles.css"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="container"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;!--</span><span class="s2"> </span><span class="s1">Loading</span><span class="s2"> </span><span class="s1">State</span><span class="s2"> </span><span class="s1">--&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">id="loading"</span><span class="s2"> </span><span class="s1">class="card</span><span class="s2"> </span><span class="s1">text-center"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="text-</span><span class="s2">3</span><span class="s1">xl</span><span class="s2"> </span><span class="s1">mb-</span><span class="s2">4</span><span class="s1">"&gt;</span><span class="s2">⛳ </span><span class="s1">Golf</span><span class="s2"> </span><span class="s1">Scorecard</span><span class="s2"> </span><span class="s1">Pro&lt;/div&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="flex</span><span class="s2"> </span><span class="s1">justify-center</span><span class="s2"> </span><span class="s1">mb-</span><span class="s2">4</span><span class="s1">"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="spinner"&gt;&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span><span class="s3">&lt;/div&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">id="loadStatus"</span><span class="s2"> </span><span class="s1">class="status</span><span class="s2"> </span><span class="s1">status-info"&gt;Initializing</span><span class="s2"> </span><span class="s1">application...&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span><span class="s3">&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;!--</span><span class="s2"> </span><span class="s1">Main</span><span class="s2"> </span><span class="s1">Application</span><span class="s2"> </span><span class="s1">--&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">id="app"</span><span class="s2"> </span><span class="s1">class="hidden"&gt;&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">        </span></span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;!--</span><span class="s2"> </span><span class="s1">Error</span><span class="s2"> </span><span class="s1">State</span><span class="s2"> </span><span class="s1">--&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">        </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">id="error"</span><span class="s2"> </span><span class="s1">class="hidden"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">            </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="card</span><span class="s2"> </span><span class="s1">text-center"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="text-</span><span class="s2">3</span><span class="s1">xl</span><span class="s2"> </span><span class="s1">mb-</span><span class="s2">4</span><span class="s1">"&gt;</span><span class="s2">⛳ </span><span class="s1">Golf</span><span class="s2"> </span><span class="s1">Scorecard</span><span class="s2"> </span><span class="s1">Pro&lt;/div&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">&lt;div</span><span class="s2"> </span><span class="s1">class="status</span><span class="s2"> </span><span class="s1">status-error</span><span class="s2"> </span><span class="s1">mb-</span><span class="s2">6</span><span class="s1">"&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span></span><span class="s1">&lt;strong&gt;Application</span><span class="s2"> </span><span class="s1">Error&lt;/strong&gt;&lt;br&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                    </span></span><span class="s1">There</span><span class="s2"> </span><span class="s1">was</span><span class="s2"> </span><span class="s1">a</span><span class="s2"> </span><span class="s1">problem</span><span class="s2"> </span><span class="s1">loading</span><span class="s2"> </span><span class="s1">the</span><span class="s2"> </span><span class="s1">application.</span><span class="s2"> </span><span class="s1">Please</span><span class="s2"> </span><span class="s1">try</span><span class="s2"> </span><span class="s1">refreshing</span><span class="s2"> </span><span class="s1">the</span><span class="s2"> </span><span class="s1">page.</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span><span class="s3">&lt;/div&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">                </span></span><span class="s1">&lt;button</span><span class="s2"> </span><span class="s1">class="btn"</span><span class="s2"> </span><span class="s1">onclick="location.reload()"&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                    </span>🔄 </span><span class="s3">Refresh</span><span class="s1"> </span><span class="s3">Page</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">                </span></span><span class="s3">&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span><span class="s3">&lt;/div&gt;</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">        </span></span><span class="s3">&lt;/div&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;/div&gt;</span></p>
+<p class="p3"><span class="s1"></span><br></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;!--</span><span class="s2"> </span><span class="s1">External</span><span class="s2"> </span><span class="s1">Dependencies</span><span class="s2"> </span><span class="s1">--&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">crossorigin</span><span class="s2"> </span><span class="s1">src="https://unpkg.com/react@</span><span class="s2">18</span><span class="s1">/umd/react.production.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">crossorigin</span><span class="s2"> </span><span class="s1">src="https://unpkg.com/react-dom@</span><span class="s2">18</span><span class="s1">/umd/react-dom.production.min.js"&gt;&lt;/script&gt;</span></p>
+<p class="p3"><span class="s1"></span><br></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;!--</span><span class="s2"> </span><span class="s1">Application</span><span class="s2"> </span><span class="s1">Modules</span><span class="s2"> </span><span class="s1">-</span><span class="s2"> </span><span class="s1">Load</span><span class="s2"> </span><span class="s1">in</span><span class="s2"> </span><span class="s1">correct</span><span class="s2"> </span><span class="s1">order</span><span class="s2"> </span><span class="s1">--&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="utils.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="scoring.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="courseData.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="api.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="PlayerSetup.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="CourseSearch.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="GameOfTens.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="Scorecard.js"&gt;&lt;/script&gt;</span></p>
+<p class="p1"><span class="s2"><span class="Apple-converted-space">    </span></span><span class="s1">&lt;script</span><span class="s2"> </span><span class="s1">src="app.js"&gt;&lt;/script&gt;</span></p>
+<p class="p4"><span class="s1"></span><br></p>
+<p class="p5"><span class="s4">&lt;</span><span class="s5">script</span><span class="s4">&gt;</span><span class="s6"> </span><span class="s7"><i>// Debug script - add this temporarily</i></span><span class="s6"> </span><span class="s8">setTimeout</span><span class="s4">(()</span><span class="s6"> </span><span class="s8">=&gt;</span><span class="s6"> </span><span class="s4">{</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'=== MODULE CHECK ==='</span><span class="s4">);</span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'GolfUtils:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">GolfUtils</span><span class="s4">);</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'GolfScoring:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">GolfScoring</span><span class="s4">);</span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'CourseData:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">CourseData</span><span class="s4">);</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'GolfAPI:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">GolfAPI</span><span class="s4">);</span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'PlayerSetup:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">PlayerSetup</span><span class="s4">);</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'CourseSearch:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">CourseSearch</span><span class="s4">);</span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'GameOfTens:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">GameOfTens</span><span class="s4">);</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'Scorecard:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> </span><span class="s8">window</span><span class="s4">.</span><span class="s6">Scorecard</span><span class="s4">);</span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'React:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> React</span><span class="s4">);</span><span class="s6"> </span><span class="s9">console</span><span class="s4">.</span><span class="s8">log</span><span class="s4">(</span><span class="s1">'ReactDOM:'</span><span class="s4">,</span><span class="s6"> </span><span class="s10">typeof</span><span class="s6"> ReactDOM</span><span class="s4">);</span><span class="s6"> </span><span class="s4">},</span><span class="s6"> </span><span class="s9">1000</span><span class="s4">);</span><span class="s6"> </span><span class="s4">&lt;/</span><span class="s5">script</span><span class="s4">&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
 </body>
 </html>

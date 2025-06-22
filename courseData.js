@@ -38,29 +38,7 @@ window.CourseData = (function() {
         return holesWithDifficulty.map(({ difficulty, ...hole }) => hole);
     };
     
-const generatePebbleBeachHoles = () => {
-        return [
-            { hole: 1, par: 4, yardage: 381, handicap: 13 },
-            { hole: 2, par: 5, yardage: 502, handicap: 7 },
-            { hole: 3, par: 4, yardage: 390, handicap: 11 },
-            { hole: 4, par: 4, yardage: 331, handicap: 17 },
-            { hole: 5, par: 3, yardage: 188, handicap: 15 },
-            { hole: 6, par: 5, yardage: 513, handicap: 1 },
-            { hole: 7, par: 3, yardage: 106, handicap: 9 },
-            { hole: 8, par: 4, yardage: 431, handicap: 3 },
-            { hole: 9, par: 4, yardage: 464, handicap: 5 },
-            { hole: 10, par: 4, yardage: 446, handicap: 8 },
-            { hole: 11, par: 4, yardage: 390, handicap: 18 },
-            { hole: 12, par: 3, yardage: 202, handicap: 12 },
-            { hole: 13, par: 4, yardage: 399, handicap: 14 },
-            { hole: 14, par: 5, yardage: 580, handicap: 2 },
-            { hole: 15, par: 4, yardage: 397, handicap: 10 },
-            { hole: 16, par: 4, yardage: 402, handicap: 16 },
-            { hole: 17, par: 3, yardage: 178, handicap: 6 },
-            { hole: 18, par: 5, yardage: 543, handicap: 4 }
-        ];
-    };    
-// Generate realistic default holes
+    // Generate realistic default holes
     const generateDefaultHoles = (targetPar = 72) => {
         const holes = [];
         
@@ -104,6 +82,30 @@ const generatePebbleBeachHoles = () => {
         }
         
         return assignProperHandicaps(holes);
+    };
+    
+    // Pebble Beach Golf Links holes
+    const generatePebbleBeachHoles = () => {
+        return [
+            { hole: 1, par: 4, yardage: 381, handicap: 13 },
+            { hole: 2, par: 5, yardage: 502, handicap: 7 },
+            { hole: 3, par: 4, yardage: 390, handicap: 11 },
+            { hole: 4, par: 4, yardage: 331, handicap: 17 },
+            { hole: 5, par: 3, yardage: 188, handicap: 15 },
+            { hole: 6, par: 5, yardage: 513, handicap: 1 },
+            { hole: 7, par: 3, yardage: 106, handicap: 9 },
+            { hole: 8, par: 4, yardage: 431, handicap: 3 },
+            { hole: 9, par: 4, yardage: 464, handicap: 5 },
+            { hole: 10, par: 4, yardage: 446, handicap: 8 },
+            { hole: 11, par: 4, yardage: 390, handicap: 18 },
+            { hole: 12, par: 3, yardage: 202, handicap: 12 },
+            { hole: 13, par: 4, yardage: 399, handicap: 14 },
+            { hole: 14, par: 5, yardage: 580, handicap: 2 },
+            { hole: 15, par: 4, yardage: 397, handicap: 10 },
+            { hole: 16, par: 4, yardage: 402, handicap: 16 },
+            { hole: 17, par: 3, yardage: 178, handicap: 6 },
+            { hole: 18, par: 5, yardage: 543, handicap: 4 }
+        ];
     };
     
     // Famous course hole data with accurate information
@@ -150,6 +152,29 @@ const generatePebbleBeachHoles = () => {
             { hole: 16, par: 4, yardage: 423, handicap: 6 },
             { hole: 17, par: 4, yardage: 495, handicap: 8 },
             { hole: 18, par: 4, yardage: 357, handicap: 10 }
+        ];
+    };
+    
+    const generateBethpageBlackHoles = () => {
+        return [
+            { hole: 1, par: 4, yardage: 430, handicap: 7 },
+            { hole: 2, par: 4, yardage: 389, handicap: 15 },
+            { hole: 3, par: 3, yardage: 213, handicap: 11 },
+            { hole: 4, par: 5, yardage: 517, handicap: 1 },
+            { hole: 5, par: 4, yardage: 451, handicap: 9 },
+            { hole: 6, par: 4, yardage: 408, handicap: 17 },
+            { hole: 7, par: 4, yardage: 492, handicap: 3 },
+            { hole: 8, par: 3, yardage: 210, handicap: 13 },
+            { hole: 9, par: 4, yardage: 413, handicap: 5 },
+            { hole: 10, par: 4, yardage: 492, handicap: 2 },
+            { hole: 11, par: 4, yardage: 435, handicap: 12 },
+            { hole: 12, par: 5, yardage: 499, handicap: 6 },
+            { hole: 13, par: 3, yardage: 160, handicap: 18 },
+            { hole: 14, par: 4, yardage: 442, handicap: 14 },
+            { hole: 15, par: 5, yardage: 478, handicap: 4 },
+            { hole: 16, par: 4, yardage: 490, handicap: 8 },
+            { hole: 17, par: 3, yardage: 207, handicap: 16 },
+            { hole: 18, par: 4, yardage: 411, handicap: 10 }
         ];
     };
     
@@ -238,29 +263,6 @@ const generatePebbleBeachHoles = () => {
                 }
             ];
         }
-    };
-    
-    const generateBethpageBlackHoles = () => {
-        return [
-            { hole: 1, par: 4, yardage: 430, handicap: 7 },
-            { hole: 2, par: 4, yardage: 389, handicap: 15 },
-            { hole: 3, par: 3, yardage: 213, handicap: 11 },
-            { hole: 4, par: 5, yardage: 517, handicap: 1 },
-            { hole: 5, par: 4, yardage: 451, handicap: 9 },
-            { hole: 6, par: 4, yardage: 408, handicap: 17 },
-            { hole: 7, par: 4, yardage: 492, handicap: 3 },
-            { hole: 8, par: 3, yardage: 210, handicap: 13 },
-            { hole: 9, par: 4, yardage: 413, handicap: 5 },
-            { hole: 10, par: 4, yardage: 492, handicap: 2 },
-            { hole: 11, par: 4, yardage: 435, handicap: 12 },
-            { hole: 12, par: 5, yardage: 499, handicap: 6 },
-            { hole: 13, par: 3, yardage: 160, handicap: 18 },
-            { hole: 14, par: 4, yardage: 442, handicap: 14 },
-            { hole: 15, par: 5, yardage: 478, handicap: 4 },
-            { hole: 16, par: 4, yardage: 490, handicap: 8 },
-            { hole: 17, par: 3, yardage: 207, handicap: 16 },
-            { hole: 18, par: 4, yardage: 411, handicap: 10 }
-        ];
     };
     
     // Validate and fix course holes data
