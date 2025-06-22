@@ -22,11 +22,23 @@ window.CourseSearch = (function() {
         
         const formatCourseInfo = (course) => {
             const info = [];
-            info.push(`⛳ Par ${course.par}`);
+            info.push(`⛳ Par ${course.par || 72}`);
             if (course.yardage) info.push(`📏 ${course.yardage} yards`);
             if (course.rating) info.push(`📊 Rating: ${course.rating}`);
             if (course.slope) info.push(`📈 Slope: ${course.slope}`);
             return info;
+        };
+        
+        const getCourseDataSource = (course) => {
+            // Safely check if course.id exists and is a string
+            const courseId = course.id || course.course_id || course.courseId || 'unknown';
+            const idString = String(courseId).toLowerCase();
+            
+            if (idString.includes('fallback') || idString.includes('sample')) {
+                return 'Sample data';
+            } else {
+                return 'Live API data';
+            }
         };
         
         return e('div', null,
@@ -64,9 +76,9 @@ window.CourseSearch = (function() {
                 ),
                 
                 // API status
-                e('div', { className: 'status status-info' },
-                    e('strong', null, '🔗 API Integration: '), 
-                    'Connected to Golf Course API with professional data access'
+                e('div', { className: 'status status-success' },
+                    e('strong', null, '🔗 API Connected: '), 
+                    'Successfully connected to Golf Course API with live data'
                 ),
                 
                 // Search suggestions
@@ -90,33 +102,51 @@ window.CourseSearch = (function() {
                 e('h2', { className: 'text-2xl font-bold mb-4' }, 
                     `Found ${courses.length} Course${courses.length !== 1 ? 's' : ''}`
                 ),
-                courses.map(course =>
-                    e('div', { 
-                        key: course.id, 
+                courses.map((course, index) => {
+                    // Ensure course has required properties with fallbacks
+                    const safeSource = course || {};
+                    const safeCourse = {
+                        id: safeSource.id || safeSource.course_id || safeSource.courseId || `course-${index}`,
+                        name: safeSource.name || safeSource.course_name || safeSource.courseName || `Course ${index + 1}`,
+                        city: safeSource.city || safeSource.location?.city || 'Unknown City',
+                        state: safeSource.state || safeSource.location?.state || 'Unknown State',
+                        country: safeSource.country || safeSource.location?.country || 'USA',
+                        par: safeSource.par || safeSource.total_par || 72,
+                        yardage: safeSource.yardage || safeSource.total_yardage || null,
+                        rating: safeSource.rating || safeSource.course_rating || null,
+                        slope: safeSource.slope || safeSource.slope_rating || null,
+                        holes: safeSource.holes || safeSource.scorecard || null
+                    };
+                    
+                    return e('div', { 
+                        key: safeCourse.id, 
                         className: 'course-card mb-4',
-                        onClick: () => onSelectCourse(course)
+                        onClick: () => onSelectCourse(safeCourse)
                     },
                         e('div', { className: 'flex-between' },
                             e('div', { style: { flex: '1' } },
-                                e('h3', { className: 'text-xl font-bold mb-2' }, course.name),
+                                e('h3', { className: 'text-xl font-bold mb-2' }, safeCourse.name),
                                 e('div', { className: 'text-gray-600 mb-2' },
-                                    e('div', null, `📍 ${course.city}, ${course.state}`),
-                                    course.country && course.country !== 'USA' && 
-                                        e('div', { className: 'text-sm' }, course.country)
+                                    e('div', null, `📍 ${safeCourse.city}, ${safeCourse.state}`),
+                                    safeCourse.country && safeCourse.country !== 'USA' && 
+                                        e('div', { className: 'text-sm' }, safeCourse.country)
                                 ),
                                 e('div', { className: 'flex flex-wrap gap-4 text-sm' },
-                                    formatCourseInfo(course).map((info, index) =>
-                                        e('span', { key: index, className: index === 0 ? 'font-medium' : '' }, info)
+                                    formatCourseInfo(safeCourse).map((info, infoIndex) =>
+                                        e('span', { 
+                                            key: infoIndex, 
+                                            className: infoIndex === 0 ? 'font-medium' : '' 
+                                        }, info)
                                     )
                                 ),
                                 e('div', { className: 'text-xs text-gray-500 mt-2' },
-                                    `18 holes • ${course.id.includes('fallback') ? 'Sample data' : 'Live data'}`
+                                    `18 holes • ${getCourseDataSource(safeCourse)}`
                                 )
                             ),
                             e('div', { className: 'btn' }, '⛳ Select →')
                         )
-                    )
-                )
+                    );
+                })
             ),
             
             // No results message
