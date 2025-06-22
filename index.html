@@ -20,42 +20,17 @@
         <!-- Main Application -->
         <div id="app" class="hidden"></div>
         
-        <!-- Fallback Version -->
-        <div id="fallback" class="hidden">
+        <!-- Error State -->
+        <div id="error" class="hidden">
             <div class="card text-center">
                 <div class="text-3xl mb-4">⛳ Golf Scorecard Pro</div>
-                <div class="status status-warning mb-6">
-                    <strong>Simplified Mode</strong><br>
-                    Some features may be limited. Please try refreshing or use a modern browser.
+                <div class="status status-error mb-6">
+                    <strong>Application Error</strong><br>
+                    There was a problem loading the application. Please try refreshing the page.
                 </div>
-                
-                <div class="grid grid-2">
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-4">Quick Setup</h3>
-                        <div class="mb-4">
-                            <label class="block mb-2 font-semibold">Players:</label>
-                            <select id="playerCount" class="input">
-                                <option value="1">1 Player</option>
-                                <option value="2" selected>2 Players</option>
-                                <option value="3">3 Players</option>
-                                <option value="4">4 Players</option>
-                            </select>
-                        </div>
-                        <button class="btn" onclick="alert('Feature available in full version')">
-                            Start Round →
-                        </button>
-                    </div>
-                    
-                    <div class="card">
-                        <h3 class="text-xl font-semibold mb-4">Course Search</h3>
-                        <div class="mb-4">
-                            <input type="text" class="input" placeholder="Search courses..." id="courseSearch">
-                        </div>
-                        <button class="btn" onclick="alert('Feature available in full version')">
-                            Search Courses →
-                        </button>
-                    </div>
-                </div>
+                <button class="btn" onclick="location.reload()">
+                    🔄 Refresh Page
+                </button>
             </div>
         </div>
     </div>
@@ -63,17 +38,16 @@
     <!-- External Dependencies -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Application Modules -->
+    <!-- Application Modules - Load in correct order -->
     <script src="utils.js"></script>
-    <script src="api.js"></script>
-    <script src="courseData.js"></script>
     <script src="scoring.js"></script>
-    <script src="components/PlayerSetup.js"></script>
-    <script src="components/CourseSearch.js"></script>
-    <script src="components/Scorecard.js"></script>
-    <script src="components/GameOfTens.js"></script>
+    <script src="courseData.js"></script>
+    <script src="api.js"></script>
+    <script src="PlayerSetup.js"></script>
+    <script src="CourseSearch.js"></script>
+    <script src="GameOfTens.js"></script>
+    <script src="Scorecard.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

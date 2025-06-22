@@ -19,6 +19,20 @@
         return missing;
     };
     
+    // Check if all React components are loaded
+    const checkComponents = () => {
+        const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens'];
+        const missing = [];
+        
+        for (const component of requiredComponents) {
+            if (typeof window[component] === 'undefined') {
+                missing.push(component);
+            }
+        }
+        
+        return missing;
+    };
+    
     // Initialize the application
     const initializeApp = async () => {
         try {
@@ -33,6 +47,12 @@
             const missingModules = checkModules();
             if (missingModules.length > 0) {
                 throw new Error(`Missing modules: ${missingModules.join(', ')}`);
+            }
+            
+            // Check if components are loaded
+            const missingComponents = checkComponents();
+            if (missingComponents.length > 0) {
+                throw new Error(`Missing components: ${missingComponents.join(', ')}`);
             }
             
             GolfUtils.updateStatus('Starting application...', 'success');
@@ -77,7 +97,7 @@
                 // Initialize players when count changes
                 useEffect(() => {
                     const newPlayers = Array.from({ length: numPlayers }, (_, i) => 
-                        players[i] || { name: `Player ${i + 1}`, handicap: 0 }
+                        players[i] || { name: '', handicap: 0 }
                     );
                     setPlayers(newPlayers);
                 }, [numPlayers]);
@@ -89,6 +109,9 @@
                         setStep(savedData.step || 'setup');
                         setPlayers(savedData.players || players);
                         setPlayTens(savedData.playTens || false);
+                        if (savedData.selectedCourse) setSelectedCourse(savedData.selectedCourse);
+                        if (savedData.scores) setScores(savedData.scores);
+                        if (savedData.tensSelections) setTensSelections(savedData.tensSelections);
                     }
                 }, []);
                 
@@ -192,7 +215,7 @@
                 
                 // Render based on current step
                 if (step === 'setup') {
-                    return window.PlayerSetup ? e(window.PlayerSetup, {
+                    return e(window.PlayerSetup, {
                         numPlayers,
                         setNumPlayers,
                         players,
@@ -200,14 +223,11 @@
                         playTens,
                         setPlayTens,
                         onContinue: () => setStep('course-search')
-                    }) : e('div', { className: 'card text-center' }, 
-                        e('h1', { className: 'text-xl font-bold mb-4' }, 'Loading Player Setup...'),
-                        e('div', { className: 'spinner' })
-                    );
+                    });
                 }
                 
                 if (step === 'course-search') {
-                    return window.CourseSearch ? e(window.CourseSearch, {
+                    return e(window.CourseSearch, {
                         searchQuery,
                         setSearchQuery,
                         loading,
@@ -215,14 +235,11 @@
                         onSearch: searchCourses,
                         onSelectCourse: selectCourse,
                         onBack: () => setStep('setup')
-                    }) : e('div', { className: 'card text-center' }, 
-                        e('h1', { className: 'text-xl font-bold mb-4' }, 'Loading Course Search...'),
-                        e('div', { className: 'spinner' })
-                    );
+                    });
                 }
                 
                 if (step === 'scorecard' && selectedCourse) {
-                    return window.Scorecard ? e(window.Scorecard, {
+                    return e(window.Scorecard, {
                         course: selectedCourse,
                         players,
                         scores,
@@ -232,10 +249,7 @@
                         onToggleTens: toggleTensSelection,
                         onBack: () => setStep('course-search'),
                         onNewRound: startNewRound
-                    }) : e('div', { className: 'card text-center' }, 
-                        e('h1', { className: 'text-xl font-bold mb-4' }, 'Loading Scorecard...'),
-                        e('div', { className: 'spinner' })
-                    );
+                    });
                 }
                 
                 return e('div', { className: 'card text-center' }, 
@@ -265,133 +279,4 @@
     } else {
         initializeApp();
     }
-})();} catch (error) {
-                    console.log('API search failed, using fallback data');
-                    const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
-                    setCourses(fallbackCourses);
-                }
-                
-                setLoading(false);
-            };
-            
-            // Select course and initialize scoring
-            const selectCourse = (course) => {
-                setSelectedCourse(course);
-                
-                // Initialize scoring arrays
-                const initialScores = {};
-                const initialTensSelections = {};
-                
-                players.forEach((player, playerIndex) => {
-                    initialScores[playerIndex] = {};
-                    initialTensSelections[playerIndex] = {};
-                    course.holes.forEach(hole => {
-                        initialScores[playerIndex][hole.hole] = '';
-                        initialTensSelections[playerIndex][hole.hole] = false;
-                    });
-                });
-                
-                setScores(initialScores);
-                setTensSelections(initialTensSelections);
-                setStep('scorecard');
-            };
-            
-            // Update player score
-            const updateScore = (playerIndex, hole, score) => {
-                setScores(prev => ({
-                    ...prev,
-                    [playerIndex]: {
-                        ...prev[playerIndex],
-                        [hole]: score
-                    }
-                }));
-            };
-            
-            // Toggle tens selection
-            const toggleTensSelection = (playerIndex, hole) => {
-                const currentSelections = tensSelections[playerIndex] || {};
-                
-                if (!GolfScoring.canSelectForTens(currentSelections, hole)) {
-                    return;
-                }
-                
-                setTensSelections(prev => ({
-                    ...prev,
-                    [playerIndex]: {
-                        ...prev[playerIndex],
-                        [hole]: !prev[playerIndex][hole]
-                    }
-                }));
-            };
-            
-            // Start new round
-            const startNewRound = () => {
-                setStep('setup');
-                setScores({});
-                setTensSelections({});
-                setSelectedCourse(null);
-                setCourses([]);
-                setSearchQuery('');
-                GolfUtils.saveToStorage('current-round', null); // Clear saved data
-            };
-            
-            // Render based on current step
-            if (step === 'setup') {
-                return window.PlayerSetup ? e(window.PlayerSetup, {
-                    numPlayers,
-                    setNumPlayers,
-                    players,
-                    setPlayers,
-                    playTens,
-                    setPlayTens,
-                    onContinue: () => setStep('course-search')
-                }) : e('div', { className: 'card text-center' }, 
-                    e('h1', null, 'PlayerSetup component not loaded')
-                );
-            }
-            
-            if (step === 'course-search') {
-                return window.CourseSearch ? e(window.CourseSearch, {
-                    searchQuery,
-                    setSearchQuery,
-                    loading,
-                    courses,
-                    onSearch: searchCourses,
-                    onSelectCourse: selectCourse,
-                    onBack: () => setStep('setup')
-                }) : e('div', { className: 'card text-center' }, 
-                    e('h1', null, 'CourseSearch component not loaded')
-                );
-            }
-            
-            if (step === 'scorecard' && selectedCourse) {
-                return window.Scorecard ? e(window.Scorecard, {
-                    course: selectedCourse,
-                    players,
-                    scores,
-                    tensSelections,
-                    playTens,
-                    onUpdateScore: updateScore,
-                    onToggleTens: toggleTensSelection,
-                    onBack: () => setStep('course-search'),
-                    onNewRound: startNewRound
-                }) : e('div', { className: 'card text-center' }, 
-                    e('h1', null, 'Scorecard component not loaded')
-                );
-            }
-            
-            return e('div', { className: 'card text-center' }, 
-                e('h1', null, 'Golf Scorecard Pro'),
-                e('p', null, 'Invalid step or missing course data')
-            );
-        };
-        
-        // Render the application
-        GolfUtils.showApp();
-        ReactDOM.render(e(GolfScorecardApp), GolfUtils.$('app'));
-        console.log('✅ Golf Scorecard Pro loaded successfully!');
-    };
-    
-    // Start the initialization process
-    initializeApp();
 })();
