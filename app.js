@@ -21,7 +21,7 @@
     
     // Check if all React components are loaded
     const checkComponents = () => {
-        const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens'];
+        const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens', 'Skins', 'Wolf'];
         const missing = [];
         
         for (const component of requiredComponents) {
@@ -94,6 +94,14 @@
                 const [tensSelections, setTensSelections] = useState({});
                 const [playTens, setPlayTens] = useState(false);
                 
+                // Skins game state
+                const [playSkins, setPlaySkins] = useState(false);
+                const [skinsMode, setSkinsMode] = useState('push'); // 'push', 'carryover', 'null'
+                
+                // Wolf game state
+                const [playWolf, setPlayWolf] = useState(false);
+                const [wolfSelections, setWolfSelections] = useState({}); // { holeNumber: { mode: 'partner'|'lone', partnerIndex: number|null, isBlind: boolean } }
+                
                 // Initialize players when count changes
                 useEffect(() => {
                     const newPlayers = Array.from({ length: numPlayers }, (_, i) => 
@@ -109,6 +117,10 @@
                         setStep(savedData.step || 'setup');
                         setPlayers(savedData.players || players);
                         setPlayTens(savedData.playTens || false);
+                        setPlaySkins(savedData.playSkins || false);
+                        setSkinsMode(savedData.skinsMode || 'push');
+                        setPlayWolf(savedData.playWolf || false);
+                        setWolfSelections(savedData.wolfSelections || {});
                         if (savedData.selectedCourse) setSelectedCourse(savedData.selectedCourse);
                         if (savedData.scores) setScores(savedData.scores);
                         if (savedData.tensSelections) setTensSelections(savedData.tensSelections);
@@ -121,12 +133,16 @@
                         step,
                         players,
                         playTens,
+                        playSkins,
+                        skinsMode,
+                        playWolf,
+                        wolfSelections,
                         selectedCourse,
                         scores,
                         tensSelections
                     };
                     GolfUtils.saveToStorage('current-round', dataToSave);
-                }, [step, players, playTens, selectedCourse, scores, tensSelections]);
+                }, [step, players, playTens, playSkins, skinsMode, playWolf, wolfSelections, selectedCourse, scores, tensSelections]);
                 
                 // Course search with API integration
                 const searchCourses = async () => {
@@ -159,6 +175,7 @@
                     
                     const initialScores = {};
                     const initialTensSelections = {};
+                    const initialWolfSelections = {};
                     
                     players.forEach((player, playerIndex) => {
                         initialScores[playerIndex] = {};
@@ -169,8 +186,14 @@
                         });
                     });
                     
+                    // Initialize wolf selections for each hole
+                    course.holes.forEach(hole => {
+                        initialWolfSelections[hole.hole] = null;
+                    });
+                    
                     setScores(initialScores);
                     setTensSelections(initialTensSelections);
+                    setWolfSelections(initialWolfSelections);
                     setStep('scorecard');
                 };
                 
@@ -202,14 +225,27 @@
                     }));
                 };
                 
+                // Update wolf selection for a hole
+                const updateWolfSelection = (holeNumber, selection) => {
+                    setWolfSelections(prev => ({
+                        ...prev,
+                        [holeNumber]: selection
+                    }));
+                };
+                
                 // Start new round
                 const startNewRound = () => {
                     setStep('setup');
                     setScores({});
                     setTensSelections({});
+                    setWolfSelections({});
                     setSelectedCourse(null);
                     setCourses([]);
                     setSearchQuery('');
+                    setPlayTens(false);
+                    setPlaySkins(false);
+                    setSkinsMode('push');
+                    setPlayWolf(false);
                     GolfUtils.saveToStorage('current-round', null);
                 };
                 
@@ -222,6 +258,12 @@
                         setPlayers,
                         playTens,
                         setPlayTens,
+                        playSkins,
+                        setPlaySkins,
+                        skinsMode,
+                        setSkinsMode,
+                        playWolf,
+                        setPlayWolf,
                         onContinue: () => setStep('course-search')
                     });
                 }
@@ -245,8 +287,13 @@
                         scores,
                         tensSelections,
                         playTens,
+                        playSkins,
+                        skinsMode,
+                        playWolf,
+                        wolfSelections,
                         onUpdateScore: updateScore,
                         onToggleTens: toggleTensSelection,
+                        onUpdateWolfSelection: updateWolfSelection,
                         onBack: () => setStep('course-search'),
                         onNewRound: startNewRound
                     });

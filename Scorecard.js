@@ -9,9 +9,14 @@ window.Scorecard = (function() {
         players, 
         scores, 
         tensSelections, 
-        playTens, 
+        playTens,
+        playSkins,
+        skinsMode,
+        playWolf,
+        wolfSelections,
         onUpdateScore, 
-        onToggleTens, 
+        onToggleTens,
+        onUpdateWolfSelection,
         onBack, 
         onNewRound 
     }) {
@@ -213,6 +218,23 @@ window.Scorecard = (function() {
                 course,
                 scores,
                 tensSelections
+            }),
+            
+            // Skins Game section
+            playSkins && window.Skins && e(window.Skins, {
+                players,
+                course,
+                scores,
+                skinsMode
+            }),
+            
+            // Wolf Game section
+            playWolf && window.Wolf && e(window.Wolf, {
+                players,
+                course,
+                scores,
+                wolfSelections,
+                onUpdateWolfSelection
             }),
             
             // Navigation and actions
