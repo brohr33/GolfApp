@@ -6,32 +6,11 @@ window.Wolf = (function() {
     
     return function Wolf({ players, course, scores, wolfSelections, onUpdateWolfSelection }) {
         
-        // Calculate who is the Wolf for each hole
+        // Calculate who is the Wolf for each hole (simple rotation, no dependencies)
         const getWolfForHole = (holeNumber) => {
             const adjustedHole = holeNumber - 1; // Convert to 0-based index
-            
-            // Special rule: holes 17-18, the player in last place becomes Wolf
-            if (holeNumber >= 17) {
-                const currentStandings = calculateCurrentStandings();
-                if (currentStandings.length > 0) {
-                    const lastPlacePlayer = currentStandings[currentStandings.length - 1];
-                    return lastPlacePlayer.playerIndex;
-                }
-            }
-            
             // Normal rotation: each player is Wolf once every 4 holes
             return adjustedHole % players.length;
-        };
-        
-        // Calculate current point standings
-        const calculateCurrentStandings = () => {
-            const standings = players.map((player, index) => ({
-                player,
-                playerIndex: index,
-                points: calculatePlayerPoints(index)
-            }));
-            
-            return standings.sort((a, b) => b.points - a.points);
         };
         
         // Calculate points for a specific player
@@ -48,8 +27,32 @@ window.Wolf = (function() {
             return totalPoints;
         };
         
+        // Calculate current point standings
+        const calculateCurrentStandings = () => {
+            const standings = players.map((player, index) => ({
+                player,
+                playerIndex: index,
+                points: calculatePlayerPoints(index)
+            }));
+            
+            return standings.sort((a, b) => b.points - a.points);
+        };
+        
+        // Get Wolf for holes 17-18 (last place player) - separate function to avoid circular dependency
+        const getWolfForLateHoles = (holeNumber) => {
+            if (holeNumber >= 17) {
+                const standings = calculateCurrentStandings();
+                if (standings.length > 0) {
+                    const lastPlacePlayer = standings[standings.length - 1];
+                    return lastPlacePlayer.playerIndex;
+                }
+            }
+            return getWolfForHole(holeNumber);
+        };
+        
         // Calculate the result for a specific hole
         const calculateHoleResult = (holeNumber) => {
+            // Use simple rotation for Wolf determination to avoid circular dependency
             const wolfIndex = getWolfForHole(holeNumber);
             const wolfSelection = wolfSelections[holeNumber];
             
@@ -148,7 +151,8 @@ window.Wolf = (function() {
         
         // Render hole selection interface
         const renderHoleSelection = (hole) => {
-            const wolfIndex = getWolfForHole(hole.hole);
+            // Use the late holes function for display purposes (holes 17-18)
+            const wolfIndex = hole.hole >= 17 ? getWolfForLateHoles(hole.hole) : getWolfForHole(hole.hole);
             const wolfSelection = wolfSelections[hole.hole] || {};
             const holeResult = calculateHoleResult(hole.hole);
             
