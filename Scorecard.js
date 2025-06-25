@@ -9,7 +9,9 @@ window.Scorecard = (function() {
         players, 
         scores, 
         tensSelections, 
-        playTens, 
+        playTens,
+        playSkins,
+        skinsMode,
         onUpdateScore, 
         onToggleTens, 
         onBack, 
@@ -213,6 +215,14 @@ window.Scorecard = (function() {
                 course,
                 scores,
                 tensSelections
+            }),
+            
+            // Skins Game section
+            playSkins && window.Skins && e(window.Skins, {
+                players,
+                course,
+                scores,
+                skinsMode
             }),
             
             // Navigation and actions

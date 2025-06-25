@@ -2,6 +2,8 @@
     --primary-green: #059669;
     --primary-green-dark: #047857;
     --secondary-purple: #7c3aed;
+    --skins-orange: #ea580c;
+    --skins-orange-light: #fed7aa;
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
@@ -238,6 +240,10 @@ th:first-child {
     background: var(--secondary-purple);
 }
 
+.toggle.skins {
+    background: var(--skins-orange);
+}
+
 .toggle-thumb {
     position: absolute;
     top: 2px;
@@ -317,6 +323,39 @@ th:first-child {
     border-top: 1px solid #f59e0b;
     border-bottom: 1px solid #f59e0b;
     font-weight: 600;
+}
+
+/* Skins-specific styles */
+.skins-card {
+    background: var(--skins-orange-light);
+    border: 2px solid var(--skins-orange);
+}
+
+.skins-winner {
+    background: var(--skins-orange);
+    color: white;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.skins-pushed {
+    background: var(--gray-200);
+    color: var(--gray-600);
+    font-weight: 500;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+}
+
+.skins-carryover {
+    background: #fbbf24;
+    color: #92400e;
+    font-weight: 500;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
 }
 
 /* Component-specific spacing */
