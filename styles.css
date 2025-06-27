@@ -6,7 +6,6 @@
     --skins-orange-light: #fed7aa;
     --wolf-yellow: #f59e0b;
     --wolf-yellow-light: #fef3c7;
-
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
@@ -151,11 +150,109 @@ body {
 .hidden { display: none !important; }
 .loading { opacity: 0.7; pointer-events: none; }
 
+/* Tab Navigation Styles */
+.tab-container {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    scroll-behavior: smooth;
+    padding-bottom: 2px; /* Prevent shadow cutoff */
+}
+
+.tab-container::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-button {
+    position: relative;
+    white-space: nowrap;
+    flex-shrink: 0;
+    outline: none;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.tab-button:focus {
+    outline: 2px solid #059669;
+    outline-offset: 2px;
+}
+
+.tab-content {
+    background: white;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+    min-height: 300px;
+}
+
+/* Mobile-specific tab styles */
+@media (max-width: 640px) {
+    .tab-container {
+        gap: 1px;
+        padding: 0 2px;
+    }
+    
+    .tab-button {
+        padding: 10px 8px;
+        font-size: 12px;
+        min-width: 0;
+        flex: 1;
+        gap: 4px;
+        -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+        -webkit-touch-callout: none; /* Disable callout */
+        -webkit-user-select: none; /* Disable text selection */
+        user-select: none; /* Disable text selection */
+    }
+    
+    /* Show short labels on mobile */
+    .tab-label-full {
+        display: none !important;
+    }
+    
+    .tab-label-short {
+        display: inline !important;
+    }
+    
+    .tab-content {
+        padding: 16px;
+        min-height: 250px;
+    }
+}
+
+/* Tablet optimization */
+@media (max-width: 768px) and (min-width: 641px) {
+    .tab-button {
+        padding: 11px 12px;
+        font-size: 13px;
+        gap: 5px;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+}
+
+/* Ensure tabs are always visible */
+@media (max-width: 480px) {
+    .tab-button {
+        padding: 8px 6px;
+        font-size: 11px;
+        gap: 3px;
+    }
+    
+    .tab-button span:first-child {
+        font-size: 14px; /* Keep icons readable */
+    }
+}
+
 /* Table styles */
 .table-container {
     overflow-x: auto;
     border-radius: var(--border-radius);
     border: 1px solid var(--gray-200);
+    background: white;
 }
 
 table {
@@ -188,6 +285,13 @@ th:first-child {
     text-align: center;
     border: 1px solid var(--gray-300);
     border-radius: 4px;
+    font-size: 14px;
+}
+
+.score-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
 }
 
 .tens-btn {
@@ -197,6 +301,7 @@ th:first-child {
     border: none;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 50px;
 }
 
 .tens-btn.selected {
@@ -207,6 +312,10 @@ th:first-child {
 .tens-btn:not(.selected) {
     background: var(--gray-100);
     color: var(--gray-600);
+}
+
+.tens-btn:hover:not(.selected):not(:disabled) {
+    background: var(--gray-200);
 }
 
 .tens-btn:disabled {
@@ -307,10 +416,141 @@ th:first-child {
 
 /* Responsive improvements */
 @media (max-width: 640px) {
-    .container { padding: 12px; }
-    .card { padding: 16px; }
-    .text-3xl { font-size: 1.875rem; }
-    .btn { padding: 10px 20px; font-size: 14px; }
+    .container { 
+        padding: 12px; 
+        max-width: 100%;
+    }
+    
+    .card { 
+        padding: 16px; 
+        margin-bottom: 16px;
+    }
+    
+    .text-3xl { 
+        font-size: 1.875rem; 
+    }
+    
+    .btn { 
+        padding: 10px 20px; 
+        font-size: 14px; 
+    }
+    
+    /* Tab navigation responsive */
+    .tab-container {
+        gap: 1px;
+        padding: 0 2px;
+    }
+    
+    .tab-button {
+        padding: 10px 8px;
+        font-size: 12px;
+        min-width: 0;
+        flex: 1;
+        gap: 4px;
+    }
+    
+    /* Show short labels on mobile */
+    .tab-label-full {
+        display: none !important;
+    }
+    
+    .tab-label-short {
+        display: inline !important;
+    }
+    
+    .tab-content {
+        padding: 16px;
+        min-height: 250px;
+    }
+    
+    /* Grid adjustments for mobile */
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    /* Table responsiveness */
+    .table-container {
+        font-size: 13px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .score-input {
+        width: 45px;
+        padding: 4px 2px;
+        font-size: 14px;
+    }
+    
+    .tens-btn {
+        padding: 2px 4px;
+        font-size: 10px;
+        min-width: 35px;
+    }
+    
+    /* Wolf game mobile adjustments */
+    .wolf-hole-selection {
+        min-height: 80px;
+        padding: 8px;
+    }
+    
+    .wolf-hole-selection button {
+        padding: 6px 8px;
+        font-size: 11px;
+        margin: 2px 0;
+    }
+    
+    /* Course header mobile */
+    .text-center .flex {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    /* Navigation buttons mobile */
+    .flex-between {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .flex-between .flex {
+        justify-content: center;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+    .container {
+        padding: 8px;
+    }
+    
+    .tab-button {
+        padding: 8px 4px;
+        font-size: 11px;
+        gap: 2px;
+    }
+    
+    .tab-button span:first-child {
+        font-size: 14px; /* Keep icons readable */
+    }
+    
+    .card {
+        padding: 12px;
+    }
+    
+    .table-container {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 8px 4px;
+    }
+    
+    .score-input {
+        width: 40px;
+        padding: 3px 1px;
+    }
 }
 
 /* Additional styles for modular components */
@@ -439,10 +679,40 @@ th:first-child {
     text-align: center;
 }
 
-/* Responsive improvements for components */
+/* Tab-specific content styling */
+.tab-content .card {
+    margin-bottom: 0;
+    box-shadow: none;
+    border: 1px solid var(--gray-200);
+}
+
+.tab-content .card:last-child {
+    margin-bottom: 0;
+}
+
+/* Game result cards in tabs */
+.tab-content .skins-card,
+.tab-content .wolf-card {
+    margin: 0;
+    border-radius: var(--border-radius);
+}
+
+/* Enhanced table styles for tabs */
+.tab-content .table-container {
+    margin-bottom: 0;
+}
+
+/* Responsive tab improvements and general mobile optimization */
 @media (max-width: 768px) {
+    /* General layout adjustments */
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Table and scoring improvements */
     .table-container {
         font-size: 14px;
+        border-radius: 6px;
     }
     
     .score-input {
@@ -453,10 +723,34 @@ th:first-child {
     .tens-btn {
         padding: 2px 6px;
         font-size: 10px;
+        min-width: 40px;
     }
     
     .wolf-hole-selection {
         min-height: 100px;
+        padding: 10px;
+    }
+    
+    /* Tab improvements for medium screens */
+    .tab-button {
+        padding: 11px 12px;
+        font-size: 13px;
+        gap: 5px;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+}
+
+/* Tablet-specific optimizations */
+@media (max-width: 768px) and (min-width: 641px) {
+    .tab-label-full {
+        display: inline !important;
+    }
+    
+    .tab-label-short {
+        display: none !important;
     }
 }
 
@@ -464,6 +758,16 @@ th:first-child {
 @media print {
     .no-print {
         display: none !important;
+    }
+    
+    .tab-navigation {
+        display: none !important;
+    }
+    
+    .tab-content {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
     }
     
     .card {
