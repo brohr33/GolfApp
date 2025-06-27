@@ -266,35 +266,33 @@ window.Wolf = (function() {
             e('div', { className: 'card mt-4', style: { background: '#f9fafb' } },
                 e('h3', { className: 'font-semibold mb-4 text-center' }, '🐺 Wolf Selections'),
                 
-                // Debug info
-                e('div', { style: { fontSize: '10px', color: '#6b7280', marginBottom: '8px', textAlign: 'center' } },
-                    `Debug: Total holes: ${course.holes.length}, Players: ${players.length}`
-                ),
-                
                 e('div', { className: 'grid gap-4' },
                     course.holes.map(hole => {
                         const wolfIndex = hole.hole >= 17 ? getWolfForLateHoles(hole.hole) : getWolfForHole(hole.hole);
                         const wolfSelection = wolfSelections[hole.hole] || {};
                         
-                        // Check if all players have scores for this hole
-                        const hasAllScores = players.every((_, index) => {
+                        // Check if ANY players have scores for this hole (simplified check)
+                        const playersWithScores = players.filter((_, index) => {
                             const score = parseInt(scores[index]?.[hole.hole]);
                             return score && score > 0;
                         });
                         
-                        // Debug logging for each hole
+                        const hasScores = playersWithScores.length > 0;
+                        
+                        // Debug info for this specific hole
                         const scoresDebug = players.map((_, index) => {
                             const score = parseInt(scores[index]?.[hole.hole]);
-                            return `P${index}:${score || 'none'}`;
+                            return `P${index}:${score || 'X'}`;
                         }).join(', ');
                         
-                        // Always show holes that have ANY scores (not requiring ALL players to have scores)
-                        const hasSomeScores = players.some((_, index) => {
-                            const score = parseInt(scores[index]?.[hole.hole]);
-                            return score && score > 0;
+                        console.log(`Hole ${hole.hole} check:`, {
+                            playersWithScores: playersWithScores.length,
+                            hasScores,
+                            scoresDebug,
+                            wolfSelection
                         });
                         
-                        if (!hasSomeScores) {
+                        if (!hasScores) {
                             return null; // Don't show holes without any scores
                         }
                         
@@ -313,10 +311,154 @@ window.Wolf = (function() {
                             
                             // Debug info for this hole
                             e('div', { style: { fontSize: '9px', color: '#6b7280', marginBottom: '8px', textAlign: 'center' } },
-                                `Scores: ${scoresDebug} | All scores: ${hasAllScores ? 'Yes' : 'No'} | Some scores: ${hasSomeScores ? 'Yes' : 'No'}`
+                                `Scores: ${scoresDebug} | Players with scores: ${playersWithScores.length}/${players.length}`
                             ),
                             
-                            renderHoleSelection(hole)
+                            // Force show the selection interface regardless of score completeness
+                            e('div', { className: 'wolf-hole-selection' },
+                                e('div', { 
+                                    style: { 
+                                        fontWeight: 'bold', 
+                                        marginBottom: '8px',
+                                        color: '#ea580c'
+                                    } 
+                                }, `Wolf: ${GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex)}`),
+                                
+                                // Always show selection options if we have any scores
+                                e('div', { className: 'grid gap-2' },
+                                    // Partner selection buttons
+                                    e('div', { 
+                                        style: { 
+                                            fontSize: '12px', 
+                                            fontWeight: '500', 
+                                            marginBottom: '4px' 
+                                        } 
+                                    }, 'Choose Partner:'),
+                                    
+                                    players.map((player, index) => {
+                                        if (index === wolfIndex) return null;
+                                        const playerName = GolfUtils.formatPlayerName(player.name, index);
+                                        const isSelected = wolfSelection.mode === 'partner' && wolfSelection.partnerIndex === index;
+                                        
+                                        return e('button', {
+                                            key: index,
+                                            onClick: (evt) => {
+                                                evt.preventDefault();
+                                                console.log(`Clicked partner button for player ${index} (${playerName}) on hole ${hole.hole}`);
+                                                onUpdateWolfSelection(hole.hole, {
+                                                    mode: 'partner',
+                                                    partnerIndex: index,
+                                                    isBlind: false
+                                                });
+                                            },
+                                            className: 'btn btn-secondary',
+                                            style: { 
+                                                padding: '6px 10px', 
+                                                fontSize: '12px',
+                                                background: isSelected ? '#059669' : '#fed7aa',
+                                                color: isSelected ? 'white' : '#ea580c',
+                                                border: `2px solid ${isSelected ? '#059669' : '#ea580c'}`,
+                                                fontWeight: isSelected ? 'bold' : 'normal',
+                                                cursor: 'pointer',
+                                                margin: '2px'
+                                            }
+                                        }, isSelected ? `✓ ${playerName}` : `Partner: ${playerName}`);
+                                    }),
+                                    
+                                    // Lone Wolf options
+                                    e('div', { 
+                                        style: { 
+                                            fontSize: '12px', 
+                                            fontWeight: '500', 
+                                            margin: '8px 0 4px 0' 
+                                        } 
+                                    }, 'Or Go Alone:'),
+                                    e('button', {
+                                        onClick: (evt) => {
+                                            evt.preventDefault();
+                                            console.log(`Clicked Lone Wolf for hole ${hole.hole}`);
+                                            onUpdateWolfSelection(hole.hole, {
+                                                mode: 'lone',
+                                                partnerIndex: null,
+                                                isBlind: false
+                                            });
+                                        },
+                                        className: 'btn',
+                                        style: { 
+                                            padding: '6px 10px', 
+                                            fontSize: '12px',
+                                            background: wolfSelection.mode === 'lone' && !wolfSelection.isBlind ? '#059669' : '#dc2626',
+                                            fontWeight: wolfSelection.mode === 'lone' && !wolfSelection.isBlind ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            margin: '2px'
+                                        }
+                                    }, wolfSelection.mode === 'lone' && !wolfSelection.isBlind ? '✓ Lone Wolf (4 pts)' : '🐺 Lone Wolf (4 pts)'),
+                                    e('button', {
+                                        onClick: (evt) => {
+                                            evt.preventDefault();
+                                            console.log(`Clicked Blind Wolf for hole ${hole.hole}`);
+                                            onUpdateWolfSelection(hole.hole, {
+                                                mode: 'lone',
+                                                partnerIndex: null,
+                                                isBlind: true
+                                            });
+                                        },
+                                        className: 'btn',
+                                        style: { 
+                                            padding: '6px 10px', 
+                                            fontSize: '12px',
+                                            background: wolfSelection.mode === 'lone' && wolfSelection.isBlind ? '#059669' : '#7c2d12',
+                                            fontWeight: wolfSelection.mode === 'lone' && wolfSelection.isBlind ? 'bold' : 'normal',
+                                            cursor: 'pointer',
+                                            margin: '2px'
+                                        }
+                                    }, wolfSelection.mode === 'lone' && wolfSelection.isBlind ? '✓ Blind Wolf (6 pts)' : '🌙 Blind Wolf (6 pts)')
+                                ),
+                                
+                                // Show current selection and reset option
+                                wolfSelection.mode && e('div', { 
+                                    style: { 
+                                        background: '#ecfdf5',
+                                        padding: '8px',
+                                        borderRadius: '6px',
+                                        fontSize: '12px',
+                                        marginTop: '8px',
+                                        border: '1px solid #10b981'
+                                    }
+                                },
+                                    e('div', { style: { fontWeight: 'bold', color: '#059669', marginBottom: '4px' } },
+                                        'Current Selection:'
+                                    ),
+                                    e('div', { style: { marginBottom: '8px' } },
+                                        wolfSelection.mode === 'lone' ? 
+                                            (wolfSelection.isBlind ? '🌙 Blind Wolf (6 pts)' : '🐺 Lone Wolf (4 pts)') :
+                                            `🤝 ${GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex)} + ${GolfUtils.formatPlayerName(
+                                                players[wolfSelection.partnerIndex].name, 
+                                                wolfSelection.partnerIndex
+                                            )} (2 pts each)`
+                                    ),
+                                    
+                                    // Reset button
+                                    e('button', {
+                                        onClick: (evt) => {
+                                            evt.preventDefault();
+                                            console.log(`Reset selection for hole ${hole.hole}`);
+                                            onUpdateWolfSelection(hole.hole, null);
+                                        },
+                                        style: { 
+                                            marginTop: '8px',
+                                            padding: '4px 8px',
+                                            fontSize: '10px',
+                                            background: '#ef4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            fontWeight: '500'
+                                        }
+                                    }, '🔄 Reset Selection')
+                                )
+                            )
                         );
                     }).filter(Boolean)
                 ),
@@ -543,47 +685,74 @@ window.Wolf = (function() {
                                 
                                 // Net scores for all players
                                 e('td', null,
-                                    holeResult ? e('div', { style: { fontSize: '12px' } },
-                                        players.map((player, index) => {
-                                            const netScore = holeResult.netScores[index];
-                                            const isWolf = index === wolfIndex;
-                                            const isPartner = wolfSelection && wolfSelection.partnerIndex === index;
+                                    (() => {
+                                        // Calculate net scores for all players on this hole
+                                        const hole = course.holes.find(h => h.hole === holeNumber);
+                                        if (!hole) return e('div', { style: { fontSize: '11px', color: '#6b7280', fontStyle: 'italic' } }, 'Hole not found');
+                                        
+                                        const playerNetScores = players.map((player, index) => {
+                                            const grossScore = parseInt(scores[index]?.[holeNumber]);
+                                            if (!grossScore || grossScore <= 0) {
+                                                return { index, name: player.name, grossScore: null, netScore: null };
+                                            }
                                             
-                                            return e('div', { 
-                                                key: index,
-                                                style: { 
-                                                    display: 'flex',
-                                                    justifyContent: 'space-between',
-                                                    alignItems: 'center',
-                                                    padding: '1px 4px',
-                                                    background: isWolf ? '#fef3c7' : isPartner ? '#ecfdf5' : 'transparent',
-                                                    borderRadius: '3px',
-                                                    marginBottom: '1px'
-                                                }
-                                            },
-                                                e('span', { 
+                                            const strokes = GolfScoring.getStrokesForHole(player.handicap, hole.handicap);
+                                            const netScore = grossScore - strokes;
+                                            
+                                            return { 
+                                                index, 
+                                                name: player.name, 
+                                                grossScore, 
+                                                netScore,
+                                                strokes
+                                            };
+                                        });
+                                        
+                                        const hasAnyScores = playerNetScores.some(p => p.netScore !== null);
+                                        
+                                        if (!hasAnyScores) {
+                                            return e('div', { style: { fontSize: '11px', color: '#6b7280', fontStyle: 'italic' } }, 'No scores yet');
+                                        }
+                                        
+                                        return e('div', { style: { fontSize: '12px' } },
+                                            playerNetScores.map((playerData, index) => {
+                                                const isWolf = index === wolfIndex;
+                                                const isPartner = wolfSelection && wolfSelection.partnerIndex === index;
+                                                
+                                                return e('div', { 
+                                                    key: index,
                                                     style: { 
-                                                        fontSize: '10px',
-                                                        fontWeight: isWolf || isPartner ? 'bold' : 'normal'
-                                                    } 
-                                                }, 
-                                                    `${GolfUtils.formatPlayerName(player.name, index)}${isWolf ? ' 🐺' : isPartner ? ' 🤝' : ''}`
-                                                ),
-                                                e('span', { 
-                                                    style: { 
-                                                        fontWeight: 'bold',
-                                                        color: netScore !== null ? '#374151' : '#9ca3af'
-                                                    } 
-                                                }, netScore !== null ? netScore : '—')
-                                            );
-                                        })
-                                    ) : e('div', { 
-                                        style: { 
-                                            fontSize: '11px', 
-                                            color: '#6b7280',
-                                            fontStyle: 'italic'
-                                        } 
-                                    }, 'No scores yet')
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        padding: '1px 4px',
+                                                        background: isWolf ? '#fef3c7' : isPartner ? '#ecfdf5' : 'transparent',
+                                                        borderRadius: '3px',
+                                                        marginBottom: '1px'
+                                                    }
+                                                },
+                                                    e('span', { 
+                                                        style: { 
+                                                            fontSize: '10px',
+                                                            fontWeight: isWolf || isPartner ? 'bold' : 'normal'
+                                                        } 
+                                                    }, 
+                                                        `${GolfUtils.formatPlayerName(playerData.name, index)}${isWolf ? ' 🐺' : isPartner ? ' 🤝' : ''}`
+                                                    ),
+                                                    e('span', { 
+                                                        style: { 
+                                                            fontWeight: 'bold',
+                                                            color: playerData.netScore !== null ? '#374151' : '#9ca3af'
+                                                        } 
+                                                    }, 
+                                                        playerData.netScore !== null ? 
+                                                            `${playerData.grossScore}(${playerData.netScore})` : 
+                                                            '—'
+                                                    )
+                                                );
+                                            })
+                                        );
+                                    })()
                                 ),
                                 
                                 // Detailed result explanation
