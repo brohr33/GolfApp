@@ -200,6 +200,10 @@ body {
         min-width: 0;
         flex: 1;
         gap: 4px;
+        -webkit-tap-highlight-color: transparent; /* Remove mobile tap highlight */
+        -webkit-touch-callout: none; /* Disable callout */
+        -webkit-user-select: none; /* Disable text selection */
+        user-select: none; /* Disable text selection */
     }
     
     /* Show short labels on mobile */
@@ -302,6 +306,7 @@ th:first-child {
 
 .tens-btn.selected {
     background: var(--secondary-purple);
+    color: white;
 }
 
 .tens-btn:not(.selected) {
