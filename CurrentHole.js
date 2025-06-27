@@ -8,9 +8,12 @@ window.CurrentHole = (function() {
         course, 
         players, 
         scores, 
+        tensSelections,
+        playTens,
         playWolf,
         wolfSelections,
         onUpdateScore, 
+        onToggleTens,
         onUpdateWolfSelection 
     }) {
         
@@ -295,12 +298,6 @@ window.CurrentHole = (function() {
                     }, 'Change Selection')
                 )
             );
-        };')
-                )
-            );
-        };')
-                )
-            );
         };
         
         return e('div', null,
@@ -351,6 +348,9 @@ window.CurrentHole = (function() {
                     }
                 }, '✅ Hole Complete!')
             ),
+            
+            // Wolf indicator (if enabled)
+            getWolfIndicator(),
             
             // Player score inputs
             e('div', { className: 'grid gap-4 mb-6' },
@@ -457,9 +457,6 @@ window.CurrentHole = (function() {
                     );
                 })
             ),
-            
-            // Wolf indicator (if enabled)
-            getWolfIndicator(),
             
             // Wolf selection (if enabled and all scores entered)
             playWolf && hasAllScores && renderWolfSelection(),
