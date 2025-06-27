@@ -96,24 +96,40 @@ window.Scorecard = (function() {
                 players.map((player, playerIndex) => {
                     const playerScores = scores[playerIndex] || {};
                     
-                    const grossTotal = holes.reduce((total, hole) => {
-                        return total + (parseInt(playerScores[hole.hole]) || 0);
+                    // Calculate totals and par only for holes with scores
+                    const holesWithScores = holes.filter(hole => {
+                        const score = parseInt(playerScores[hole.hole]);
+                        return score && score > 0;
+                    });
+                    
+                    const grossTotal = holesWithScores.reduce((total, hole) => {
+                        return total + parseInt(playerScores[hole.hole]);
                     }, 0);
                     
-                    const netTotal = holes.reduce((total, hole) => {
+                    const netTotal = holesWithScores.reduce((total, hole) => {
                         const score = parseInt(playerScores[hole.hole]);
-                        if (score && score > 0) {
-                            const strokes = GolfScoring.getStrokesForHole(player.handicap, hole.handicap);
-                            return total + score - strokes;
-                        }
-                        return total;
+                        const strokes = GolfScoring.getStrokesForHole(player.handicap, hole.handicap);
+                        return total + score - strokes;
                     }, 0);
+                    
+                    const parForCompletedHoles = holesWithScores.reduce((total, hole) => {
+                        return total + hole.par;
+                    }, 0);
+                    
+                    const toPar = grossTotal - parForCompletedHoles;
                     
                     return e('td', { key: playerIndex, style: { fontWeight: 'bold' } },
                         e('div', null, grossTotal || 0),
                         e('div', { 
                             style: { fontSize: '11px', color: '#6b7280' } 
-                        }, `Net: ${netTotal || 0}`)
+                        }, `Net: ${netTotal || 0}`),
+                        grossTotal > 0 && e('div', { 
+                            style: { 
+                                fontSize: '11px', 
+                                color: toPar > 0 ? '#dc2626' : toPar < 0 ? '#059669' : '#6b7280',
+                                fontWeight: 'bold'
+                            } 
+                        }, GolfScoring.formatToPar(grossTotal, parForCompletedHoles))
                     );
                 })
             );
@@ -134,9 +150,28 @@ window.Scorecard = (function() {
                 e('td', null, '—'),
                 players.map((player, playerIndex) => {
                     const playerScores = scores[playerIndex] || {};
-                    const totalGross = GolfScoring.calculateTotal(playerScores, course);
-                    const totalNet = GolfScoring.calculateNetScore(playerScores, course, player.handicap);
-                    const toPar = totalGross - course.par;
+                    
+                    // Calculate totals only for holes with scores
+                    const holesWithScores = course.holes.filter(hole => {
+                        const score = parseInt(playerScores[hole.hole]);
+                        return score && score > 0;
+                    });
+                    
+                    const totalGross = holesWithScores.reduce((total, hole) => {
+                        return total + parseInt(playerScores[hole.hole]);
+                    }, 0);
+                    
+                    const totalNet = holesWithScores.reduce((total, hole) => {
+                        const score = parseInt(playerScores[hole.hole]);
+                        const strokes = GolfScoring.getStrokesForHole(player.handicap, hole.handicap);
+                        return total + score - strokes;
+                    }, 0);
+                    
+                    const parForCompletedHoles = holesWithScores.reduce((total, hole) => {
+                        return total + hole.par;
+                    }, 0);
+                    
+                    const toPar = totalGross - parForCompletedHoles;
                     
                     return e('td', { key: playerIndex },
                         e('div', null, totalGross || 0),
@@ -149,7 +184,7 @@ window.Scorecard = (function() {
                                 color: toPar > 0 ? '#dc2626' : toPar < 0 ? '#059669' : '#6b7280',
                                 fontWeight: 'bold'
                             } 
-                        }, GolfScoring.formatToPar(totalGross, course.par))
+                        }, GolfScoring.formatToPar(totalGross, parForCompletedHoles))
                     );
                 })
             );
