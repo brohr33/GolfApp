@@ -255,12 +255,11 @@ window.Wolf = (function() {
             
             // Wolf Selection Interface (separate from results)
             e('div', { className: 'card mt-4', style: { background: '#f9fafb' } },
-                e('h3', { className: 'font-semibold mb-4 text-center' }, '🐺 Make Wolf Selections'),
+                e('h3', { className: 'font-semibold mb-4 text-center' }, '🐺 Wolf Selections'),
                 e('div', { className: 'grid gap-4' },
                     course.holes.map(hole => {
                         const wolfIndex = hole.hole >= 17 ? getWolfForLateHoles(hole.hole) : getWolfForHole(hole.hole);
                         const wolfSelection = wolfSelections[hole.hole] || {};
-                        const hasSelection = !!wolfSelection.mode;
                         
                         // Check if all players have scores for this hole
                         const hasAllScores = players.every((_, index) => {
@@ -268,42 +267,40 @@ window.Wolf = (function() {
                             return score && score > 0;
                         });
                         
-                        if (!hasAllScores || hasSelection) {
-                            return null; // Don't show holes that are complete or don't have scores
+                        if (!hasAllScores) {
+                            return null; // Don't show holes without scores
                         }
                         
                         return e('div', { 
                             key: hole.hole,
                             className: 'card',
                             style: { 
-                                border: '2px solid #f59e0b',
-                                background: '#fef3c7'
+                                border: wolfSelection.mode ? '2px solid #10b981' : '2px solid #f59e0b',
+                                background: wolfSelection.mode ? '#ecfdf5' : '#fef3c7'
                             }
                         },
                             e('h4', { 
                                 className: 'font-bold mb-3 text-center',
-                                style: { color: '#ea580c' }
-                            }, `Hole ${hole.hole} - Wolf: ${GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex)}`),
+                                style: { color: wolfSelection.mode ? '#059669' : '#ea580c' }
+                            }, `Hole ${hole.hole} - Wolf: ${GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex)} ${wolfSelection.mode ? '✅' : '⏳'}`),
                             
                             renderHoleSelection(hole)
                         );
                     }).filter(Boolean)
                 ),
                 
-                // Show message if no selections needed
-                course.holes.every(hole => {
-                    const wolfSelection = wolfSelections[hole.hole] || {};
-                    const hasAllScores = players.every((_, index) => {
+                // Show message if no holes have scores yet
+                !course.holes.some(hole => {
+                    return players.every((_, index) => {
                         const score = parseInt(scores[index]?.[hole.hole]);
                         return score && score > 0;
                     });
-                    return !hasAllScores || wolfSelection.mode;
                 }) && e('div', { 
                     className: 'text-center text-gray-600',
                     style: { padding: '20px' }
                 }, 
-                    e('div', { style: { fontSize: '2rem', marginBottom: '8px' } }, '✅'),
-                    'All Wolf selections complete!'
+                    e('div', { style: { fontSize: '2rem', marginBottom: '8px' } }, '🎯'),
+                    'Enter scores for each hole to make Wolf selections!'
                 )
             ),
                 
