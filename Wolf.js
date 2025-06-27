@@ -149,6 +149,72 @@ window.Wolf = (function() {
             };
         };
         
+        // Enhanced function to get detailed hole result for display
+        const getDetailedHoleResult = (holeNumber) => {
+            const result = calculateHoleResult(holeNumber);
+            if (!result) return null;
+            
+            const { wolfIndex, wolfSelection, netScores, points } = result;
+            const hole = course.holes.find(h => h.hole === holeNumber);
+            
+            // Get gross scores
+            const grossScores = players.map((player, index) => {
+                const score = parseInt(scores[index]?.[holeNumber]);
+                return score && score > 0 ? score : null;
+            });
+            
+            // Build detailed result
+            const detail = {
+                wolfIndex,
+                wolfSelection,
+                points,
+                scores: players.map((player, index) => ({
+                    playerIndex: index,
+                    playerName: GolfUtils.formatPlayerName(player.name, index),
+                    grossScore: grossScores[index],
+                    netScore: netScores[index],
+                    strokes: grossScores[index] ? GolfScoring.getStrokesForHole(player.handicap, hole.handicap) : 0,
+                    pointsEarned: points[index] || 0
+                }))
+            };
+            
+            // Determine team compositions and winners
+            if (wolfSelection.mode === 'lone') {
+                const wolfData = detail.scores[wolfIndex];
+                const otherPlayers = detail.scores.filter((_, index) => index !== wolfIndex);
+                const bestOtherNet = Math.min(...otherPlayers.filter(p => p.netScore !== null).map(p => p.netScore));
+                
+                detail.teamInfo = {
+                    type: wolfSelection.isBlind ? 'blind' : 'lone',
+                    wolfTeam: [wolfData],
+                    otherTeam: otherPlayers.filter(p => p.netScore !== null),
+                    wolfWon: wolfData.netScore < bestOtherNet,
+                    winningScore: wolfData.netScore < bestOtherNet ? wolfData.netScore : bestOtherNet
+                };
+            } else {
+                const wolfData = detail.scores[wolfIndex];
+                const partnerData = detail.scores[wolfSelection.partnerIndex];
+                const otherPlayers = detail.scores.filter((_, index) => 
+                    index !== wolfIndex && index !== wolfSelection.partnerIndex && detail.scores[index].netScore !== null
+                );
+                
+                const wolfTeamBest = Math.min(wolfData.netScore, partnerData.netScore);
+                const otherTeamBest = otherPlayers.length > 0 ? Math.min(...otherPlayers.map(p => p.netScore)) : Infinity;
+                
+                detail.teamInfo = {
+                    type: 'partner',
+                    wolfTeam: [wolfData, partnerData],
+                    otherTeam: otherPlayers,
+                    wolfWon: wolfTeamBest < otherTeamBest,
+                    winningScore: wolfTeamBest < otherTeamBest ? wolfTeamBest : otherTeamBest,
+                    wolfTeamBest,
+                    otherTeamBest: otherPlayers.length > 0 ? otherTeamBest : null
+                };
+            }
+            
+            return detail;
+        };
+        
         // Render hole selection interface
         const renderHoleSelection = (hole) => {
             // Use the late holes function for display purposes (holes 17-18)
@@ -318,6 +384,114 @@ window.Wolf = (function() {
             );
         };
         
+        // Enhanced result display with score details
+        const renderDetailedResult = (holeNumber) => {
+            const detail = getDetailedHoleResult(holeNumber);
+            if (!detail) return '—';
+            
+            const { teamInfo, scores } = detail;
+            
+            return e('div', { style: { fontSize: '11px' } },
+                // Team composition and scores
+                teamInfo.type === 'lone' || teamInfo.type === 'blind' ? 
+                    e('div', null,
+                        e('div', { 
+                            style: { 
+                                fontWeight: 'bold', 
+                                color: teamInfo.wolfWon ? '#059669' : '#dc2626',
+                                marginBottom: '4px'
+                            } 
+                        }, 
+                            teamInfo.wolfWon ? 
+                                `🐺 ${teamInfo.wolfTeam[0].playerName} wins!` : 
+                                '👥 Others win!'
+                        ),
+                        // Wolf score
+                        e('div', { style: { marginBottom: '2px' } },
+                            `🐺 ${teamInfo.wolfTeam[0].playerName}: ${teamInfo.wolfTeam[0].grossScore}`,
+                            teamInfo.wolfTeam[0].strokes > 0 && ` (-${teamInfo.wolfTeam[0].strokes})`,
+                            ` = ${teamInfo.wolfTeam[0].netScore}`
+                        ),
+                        // Others' scores
+                        teamInfo.otherTeam.map(player => 
+                            e('div', { key: player.playerIndex, style: { marginBottom: '2px' } },
+                                `👤 ${player.playerName}: ${player.grossScore}`,
+                                player.strokes > 0 && ` (-${player.strokes})`,
+                                ` = ${player.netScore}`
+                            )
+                        ),
+                        // Points awarded
+                        e('div', { 
+                            style: { 
+                                marginTop: '4px', 
+                                paddingTop: '4px', 
+                                borderTop: '1px solid #e5e7eb',
+                                fontWeight: 'bold'
+                            } 
+                        },
+                            scores.filter(s => s.pointsEarned > 0).map(player =>
+                                e('div', { key: player.playerIndex },
+                                    `${player.playerName}: +${player.pointsEarned} pts`
+                                )
+                            )
+                        )
+                    ) :
+                    // Partner mode
+                    e('div', null,
+                        e('div', { 
+                            style: { 
+                                fontWeight: 'bold', 
+                                color: teamInfo.wolfWon ? '#059669' : '#dc2626',
+                                marginBottom: '4px'
+                            } 
+                        }, 
+                            teamInfo.wolfWon ? 
+                                '🐺🤝 Wolf team wins!' : 
+                                '👥 Other team wins!'
+                        ),
+                        // Wolf team scores
+                        e('div', { style: { marginBottom: '2px', fontWeight: '500' } }, 'Wolf Team:'),
+                        teamInfo.wolfTeam.map(player => 
+                            e('div', { key: player.playerIndex, style: { marginLeft: '8px', marginBottom: '1px' } },
+                                `${player.playerName}: ${player.grossScore}`,
+                                player.strokes > 0 && ` (-${player.strokes})`,
+                                ` = ${player.netScore}`
+                            )
+                        ),
+                        e('div', { style: { marginLeft: '8px', fontSize: '10px', color: '#6b7280' } },
+                            `Best: ${teamInfo.wolfTeamBest}`
+                        ),
+                        // Other team scores
+                        e('div', { style: { margin: '4px 0 2px 0', fontWeight: '500' } }, 'Other Team:'),
+                        teamInfo.otherTeam.map(player => 
+                            e('div', { key: player.playerIndex, style: { marginLeft: '8px', marginBottom: '1px' } },
+                                `${player.playerName}: ${player.grossScore}`,
+                                player.strokes > 0 && ` (-${player.strokes})`,
+                                ` = ${player.netScore}`
+                            )
+                        ),
+                        teamInfo.otherTeamBest && e('div', { style: { marginLeft: '8px', fontSize: '10px', color: '#6b7280' } },
+                            `Best: ${teamInfo.otherTeamBest}`
+                        ),
+                        // Points awarded
+                        e('div', { 
+                            style: { 
+                                marginTop: '4px', 
+                                paddingTop: '4px', 
+                                borderTop: '1px solid #e5e7eb',
+                                fontWeight: 'bold'
+                            } 
+                        },
+                            scores.filter(s => s.pointsEarned > 0).map(player =>
+                                e('div', { key: player.playerIndex },
+                                    `${player.playerName}: +${player.pointsEarned} pts`
+                                )
+                            )
+                        )
+                    )
+            );
+        };
+        
         // Render leaderboard
         const standings = calculateCurrentStandings();
         
@@ -370,7 +544,7 @@ window.Wolf = (function() {
                             e('th', { style: { textAlign: 'left' } }, 'Hole'),
                             e('th', null, 'Par'),
                             e('th', null, 'Wolf Selection'),
-                            e('th', null, 'Result')
+                            e('th', { style: { minWidth: '200px' } }, 'Detailed Results')
                         )
                     ),
                     e('tbody', null,
@@ -382,24 +556,7 @@ window.Wolf = (function() {
                                 e('td', { style: { fontWeight: 'bold' } }, hole.hole),
                                 e('td', null, hole.par),
                                 e('td', null, renderHoleSelection(hole)),
-                                e('td', null, 
-                                    (() => {
-                                        const result = calculateHoleResult(hole.hole);
-                                        if (!result) return '—';
-                                        
-                                        const winners = Object.entries(result.points)
-                                            .filter(([_, points]) => points > 0)
-                                            .map(([playerIndex, points]) => {
-                                                const playerName = GolfUtils.formatPlayerName(
-                                                    players[parseInt(playerIndex)].name, 
-                                                    parseInt(playerIndex)
-                                                );
-                                                return `${playerName} (+${points})`;
-                                            });
-                                        
-                                        return winners.length > 0 ? winners.join(', ') : 'No winner';
-                                    })()
-                                )
+                                e('td', { style: { maxWidth: '250px' } }, renderDetailedResult(hole.hole))
                             )
                         )
                     )
