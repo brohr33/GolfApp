@@ -265,9 +265,12 @@ window.Scorecard = (function() {
                             course,
                             players,
                             scores,
+                            tensSelections,
+                            playTens,
                             playWolf,
                             wolfSelections,
                             onUpdateScore,
+                            onToggleTens,
                             onUpdateWolfSelection
                         }) : e('div', { className: 'card text-center' },
                             e('h3', { className: 'text-xl font-bold mb-4' }, 'Current Hole Loading...'),

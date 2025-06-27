@@ -58,7 +58,7 @@ window.CurrentHole = (function() {
         const wolfIndex = playWolf ? getWolfForHole(currentHoleNumber) : null;
         const wolfSelection = playWolf ? (wolfSelections[currentHoleNumber] || {}) : {};
         
-        // Auto-advance to next hole when current hole is complete
+        // Advance to next hole (manual only now)
         const advanceToNextHole = () => {
             if (currentHoleNumber < 18) {
                 setCurrentHoleNumber(currentHoleNumber + 1);
@@ -68,25 +68,61 @@ window.CurrentHole = (function() {
         // Check if we should show the advance button
         const canAdvance = hasAllScores && (!playWolf || wolfSelection.mode);
         
-        // Handle score input with auto-advance
+        // Handle score input (no auto-advance)
         const handleScoreUpdate = (playerIndex, value) => {
             onUpdateScore(playerIndex, currentHoleNumber, value);
+        };
+        
+        // Calculate player's current total score vs par
+        const calculatePlayerCurrentScore = (playerIndex) => {
+            const playerScores = scores[playerIndex] || {};
+            let totalGross = 0;
+            let totalPar = 0;
             
-            // Check if this completes all scores for the hole
-            setTimeout(() => {
-                const allScoresComplete = players.every((_, pIndex) => {
-                    if (pIndex === playerIndex) {
-                        return value && parseInt(value) > 0;
-                    }
-                    const score = parseInt(scores[pIndex]?.[currentHoleNumber]);
-                    return score && score > 0;
-                });
-                
-                // If all scores are complete and Wolf selection is done (or not needed), auto-advance
-                if (allScoresComplete && (!playWolf || wolfSelection.mode)) {
-                    setTimeout(advanceToNextHole, 1000); // Give user a moment to see the completion
+            course.holes.forEach(hole => {
+                const score = parseInt(playerScores[hole.hole]);
+                if (score && score > 0) {
+                    totalGross += score;
+                    totalPar += hole.par;
                 }
-            }, 100);
+            });
+            
+            if (totalGross === 0) return null;
+            return totalGross - totalPar;
+        };
+        
+        // Get Wolf indicator for display
+        const getWolfIndicator = () => {
+            if (!playWolf || wolfIndex === null) return null;
+            
+            return e('div', { 
+                className: 'card',
+                style: { 
+                    background: '#fef3c7', 
+                    border: '2px solid #f59e0b',
+                    textAlign: 'center',
+                    marginBottom: '20px'
+                }
+            },
+                e('h3', { 
+                    className: 'font-bold text-xl mb-2',
+                    style: { color: '#f59e0b' }
+                }, '🐺 Wolf This Hole'),
+                e('div', { 
+                    style: { 
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#92400e'
+                    }
+                }, GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex)),
+                e('div', { 
+                    style: { 
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        marginTop: '4px'
+                    }
+                }, 'Choose your strategy after all scores are entered')
+            );
         };
         
         // Navigation functions
@@ -133,7 +169,7 @@ window.CurrentHole = (function() {
         
         // Render Wolf selection for current hole
         const renderWolfSelection = () => {
-            if (!playWolf || !wolfIndex !== null) return null;
+            if (!playWolf || wolfIndex === null) return null;
             
             const wolfName = GolfUtils.formatPlayerName(players[wolfIndex].name, wolfIndex);
             
@@ -141,14 +177,13 @@ window.CurrentHole = (function() {
                 className: 'card',
                 style: { 
                     background: '#fef3c7', 
-                    border: '2px solid #f59e0b',
-                    marginTop: '20px'
+                    border: '2px solid #f59e0b'
                 }
             },
                 e('h3', { 
                     className: 'font-bold text-lg mb-3 text-center',
                     style: { color: '#f59e0b' }
-                }, `🐺 Wolf: ${wolfName}`),
+                }, `🐺 ${wolfName}'s Choice`),
                 
                 !wolfSelection.mode ? e('div', { className: 'grid gap-3' },
                     // Partner selection
@@ -257,7 +292,10 @@ window.CurrentHole = (function() {
                             borderRadius: '4px',
                             cursor: 'pointer'
                         }
-                    }, 'Change Selection')
+                    }, 'Change Selection'')
+                )
+            );
+        };')
                 )
             );
         };
@@ -317,6 +355,10 @@ window.CurrentHole = (function() {
                     const playerScore = scores[playerIndex]?.[currentHoleNumber] || '';
                     const strokes = GolfScoring.getStrokesForHole(player.handicap, currentHole.handicap);
                     const netScore = playerScore ? parseInt(playerScore) - strokes : null;
+                    const currentScore = calculatePlayerCurrentScore(playerIndex);
+                    const playerTensSelections = tensSelections[playerIndex] || {};
+                    const isSelectedForTens = playerTensSelections[currentHoleNumber];
+                    const canSelectForTens = playTens && GolfScoring.canSelectForTens(playerTensSelections, currentHoleNumber);
                     
                     return e('div', { 
                         key: playerIndex,
@@ -327,15 +369,24 @@ window.CurrentHole = (function() {
                         }
                     },
                         e('div', { className: 'flex-between mb-3' },
-                            e('h3', { className: 'font-bold text-lg' }, 
-                                GolfUtils.formatPlayerName(player.name, playerIndex)
+                            e('div', null,
+                                e('h3', { className: 'font-bold text-lg' }, 
+                                    GolfUtils.formatPlayerName(player.name, playerIndex)
+                                ),
+                                currentScore !== null && e('div', { 
+                                    style: { 
+                                        fontSize: '14px',
+                                        fontWeight: '600',
+                                        color: currentScore > 0 ? '#dc2626' : currentScore < 0 ? '#059669' : '#6b7280'
+                                    }
+                                }, `Current: ${GolfScoring.formatToPar(currentScore, 0)}`)
                             ),
                             e('div', { className: 'text-sm text-gray-600' },
                                 `Handicap: ${player.handicap}`
                             )
                         ),
                         
-                        e('div', { className: 'grid grid-2 gap-4' },
+                        e('div', { className: 'grid grid-2 gap-4 mb-3' },
                             e('div', null,
                                 e('label', { className: 'block font-medium mb-2' }, 'Gross Score'),
                                 e('input', {
@@ -344,11 +395,12 @@ window.CurrentHole = (function() {
                                     onChange: (evt) => handleScoreUpdate(playerIndex, evt.target.value),
                                     min: '1',
                                     max: '15',
-                                    className: 'input',
+                                    className: 'input current-hole-input',
                                     style: { 
                                         fontSize: '24px',
                                         textAlign: 'center',
-                                        fontWeight: 'bold'
+                                        fontWeight: 'bold',
+                                        height: '56px'
                                     },
                                     placeholder: '0'
                                 })
@@ -373,7 +425,7 @@ window.CurrentHole = (function() {
                         ),
                         
                         strokes > 0 && e('div', { 
-                            className: 'text-center mt-3',
+                            className: 'text-center mb-3',
                             style: { 
                                 background: '#dbeafe',
                                 color: '#2563eb',
@@ -382,13 +434,69 @@ window.CurrentHole = (function() {
                                 fontSize: '14px',
                                 fontWeight: '500'
                             }
-                        }, `Receives ${strokes} stroke${strokes > 1 ? 's' : ''}`)
+                        }, `Receives ${strokes} stroke${strokes > 1 ? 's' : ''}`),
+                        
+                        // Tens selection button
+                        playTens && playerScore && e('div', { className: 'text-center' },
+                            e('button', {
+                                onClick: () => onToggleTens(playerIndex, currentHoleNumber),
+                                disabled: !canSelectForTens,
+                                className: `btn ${isSelectedForTens ? '' : 'btn-secondary'}`,
+                                style: { 
+                                    padding: '8px 16px',
+                                    fontSize: '14px',
+                                    background: isSelectedForTens ? '#7c3aed' : undefined,
+                                    color: isSelectedForTens ? 'white' : undefined,
+                                    opacity: !canSelectForTens ? 0.5 : 1
+                                }
+                            }, isSelectedForTens ? '✓ Selected for Tens' : 'Select for Tens')
+                        )
                     );
                 })
             ),
             
-            // Wolf selection (if enabled)
+            // Wolf indicator (if enabled)
+            getWolfIndicator(),
+            
+            // Wolf selection (if enabled and all scores entered)
             playWolf && hasAllScores && renderWolfSelection(),
+            
+            // Hole completion confirmation
+            hasAllScores && e('div', { 
+                className: 'card text-center',
+                style: { 
+                    background: canAdvance ? '#d1fae5' : '#fef3c7',
+                    border: `2px solid ${canAdvance ? '#059669' : '#f59e0b'}`,
+                    marginTop: '20px'
+                }
+            },
+                e('h3', { 
+                    className: 'font-bold text-lg mb-3',
+                    style: { color: canAdvance ? '#059669' : '#f59e0b' }
+                }, canAdvance ? '✅ Hole Complete!' : '⏳ Waiting for Wolf Selection'),
+                
+                canAdvance && currentHoleNumber < 18 && e('button', {
+                    onClick: advanceToNextHole,
+                    className: 'btn',
+                    style: { 
+                        padding: '12px 24px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        background: '#059669'
+                    }
+                }, `Continue to Hole ${currentHoleNumber + 1} →`),
+                
+                canAdvance && currentHoleNumber === 18 && e('div', { 
+                    style: {
+                        background: '#d1fae5',
+                        color: '#059669',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        fontWeight: 'bold',
+                        fontSize: '16px'
+                    }
+                }, '🏁 Round Complete! Check other tabs for results.')
+            ),
             
             // Navigation and completion
             e('div', { className: 'flex-between mt-6' },
@@ -398,25 +506,11 @@ window.CurrentHole = (function() {
                     className: 'btn btn-secondary'
                 }, '← Previous Hole'),
                 
-                canAdvance && currentHoleNumber < 18 && e('button', {
-                    onClick: advanceToNextHole,
-                    className: 'btn',
-                    style: { 
-                        background: '#059669',
-                        animation: 'pulse 2s infinite'
-                    }
-                }, `Next Hole (${currentHoleNumber + 1}) →`),
-                
-                currentHoleNumber === 18 && canAdvance && e('div', { 
-                    className: 'text-center',
-                    style: {
-                        background: '#d1fae5',
-                        color: '#059669',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        fontWeight: 'bold'
-                    }
-                }, '🏁 Round Complete!')
+                e('button', {
+                    onClick: goToNextHole,
+                    disabled: currentHoleNumber === 18,
+                    className: 'btn btn-secondary'
+                }, 'Next Hole →')
             ),
             
             // Progress indicator
