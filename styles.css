@@ -302,7 +302,6 @@ th:first-child {
 
 .tens-btn.selected {
     background: var(--secondary-purple);
-    color: white;
 }
 
 .tens-btn:not(.selected) {
