@@ -6,6 +6,15 @@ window.Wolf = (function() {
     
     return function Wolf({ players, course, scores, wolfSelections, onUpdateWolfSelection }) {
         
+        // Debug props at the component level
+        console.log('Wolf component rendered with props:', {
+            players: players?.length,
+            course: course?.name,
+            scores: scores,
+            wolfSelections: wolfSelections,
+            onUpdateWolfSelection: typeof onUpdateWolfSelection
+        });
+        
         // Calculate who is the Wolf for each hole (simple rotation, no dependencies)
         const getWolfForHole = (holeNumber) => {
             const adjustedHole = holeNumber - 1; // Convert to 0-based index
@@ -403,9 +412,35 @@ window.Wolf = (function() {
         // Render leaderboard
         const standings = calculateCurrentStandings();
         
+        // Add a simple scores summary at the top for debugging
+        const totalScoresEntered = Object.keys(scores).reduce((total, playerIndex) => {
+            const playerScores = scores[playerIndex] || {};
+            return total + Object.keys(playerScores).filter(hole => {
+                const score = parseInt(playerScores[hole]);
+                return score && score > 0;
+            }).length;
+        }, 0);
+        
         return e('div', { className: 'card', style: { background: '#fef3c7', border: '2px solid #f59e0b' } },
             e('h2', { className: 'text-2xl font-bold text-center mb-4' }, 
                 '🐺 Wolf Game Results'
+            ),
+            
+            // Debug info at top
+            e('div', { 
+                style: { 
+                    background: '#fee2e2', 
+                    padding: '8px', 
+                    marginBottom: '16px', 
+                    borderRadius: '6px',
+                    fontSize: '12px'
+                }
+            },
+                e('strong', null, 'Debug Info: '),
+                `Total scores entered: ${totalScoresEntered} | `,
+                `Players: ${players.length} | `,
+                `Holes: ${course.holes.length} | `,
+                `Wolf selections: ${Object.keys(wolfSelections).length}`
             ),
             
             // Current leaderboard
