@@ -391,6 +391,18 @@ window.Wolf = (function() {
             
             const { teamInfo, scores } = detail;
             
+            // Helper function to find who contributed the best score
+            const getBestScoreInfo = (teamPlayers, bestScore) => {
+                const bestPlayer = teamPlayers.find(p => p.netScore === bestScore);
+                if (!bestPlayer) return `Best: ${bestScore}`;
+                
+                if (bestPlayer.strokes > 0) {
+                    return `Best: ${bestPlayer.playerName} ${bestPlayer.grossScore} (${bestScore})`;
+                } else {
+                    return `Best: ${bestPlayer.playerName} (${bestScore})`;
+                }
+            };
+            
             return e('div', { style: { fontSize: '11px' } },
                 // Team composition and scores
                 teamInfo.type === 'lone' || teamInfo.type === 'blind' ? 
@@ -406,24 +418,17 @@ window.Wolf = (function() {
                                 `🐺 ${teamInfo.wolfTeam[0].playerName} wins!` : 
                                 '👥 Others win!'
                         ),
-                        // Wolf score
+                        // Wolf best score
                         e('div', { style: { marginBottom: '2px' } },
-                            `🐺 ${teamInfo.wolfTeam[0].playerName}: ${teamInfo.wolfTeam[0].grossScore}`,
-                            teamInfo.wolfTeam[0].strokes > 0 && ` (-${teamInfo.wolfTeam[0].strokes})`,
-                            ` = ${teamInfo.wolfTeam[0].netScore}`
+                            `🐺 Wolf: ${getBestScoreInfo(teamInfo.wolfTeam, teamInfo.wolfTeam[0].netScore)}`
                         ),
-                        // Others' scores
-                        teamInfo.otherTeam.map(player => 
-                            e('div', { key: player.playerIndex, style: { marginBottom: '2px' } },
-                                `👤 ${player.playerName}: ${player.grossScore}`,
-                                player.strokes > 0 && ` (-${player.strokes})`,
-                                ` = ${player.netScore}`
-                            )
+                        // Others best score
+                        e('div', { style: { marginBottom: '4px' } },
+                            `👥 Others: ${getBestScoreInfo(teamInfo.otherTeam, Math.min(...teamInfo.otherTeam.map(p => p.netScore)))}`
                         ),
                         // Points awarded
                         e('div', { 
                             style: { 
-                                marginTop: '4px', 
                                 paddingTop: '4px', 
                                 borderTop: '1px solid #e5e7eb',
                                 fontWeight: 'bold'
@@ -449,34 +454,17 @@ window.Wolf = (function() {
                                 '🐺🤝 Wolf team wins!' : 
                                 '👥 Other team wins!'
                         ),
-                        // Wolf team scores
-                        e('div', { style: { marginBottom: '2px', fontWeight: '500' } }, 'Wolf Team:'),
-                        teamInfo.wolfTeam.map(player => 
-                            e('div', { key: player.playerIndex, style: { marginLeft: '8px', marginBottom: '1px' } },
-                                `${player.playerName}: ${player.grossScore}`,
-                                player.strokes > 0 && ` (-${player.strokes})`,
-                                ` = ${player.netScore}`
-                            )
+                        // Wolf team best score
+                        e('div', { style: { marginBottom: '2px' } },
+                            `🐺 Wolf Team: ${getBestScoreInfo(teamInfo.wolfTeam, teamInfo.wolfTeamBest)}`
                         ),
-                        e('div', { style: { marginLeft: '8px', fontSize: '10px', color: '#6b7280' } },
-                            `Best: ${teamInfo.wolfTeamBest}`
-                        ),
-                        // Other team scores
-                        e('div', { style: { margin: '4px 0 2px 0', fontWeight: '500' } }, 'Other Team:'),
-                        teamInfo.otherTeam.map(player => 
-                            e('div', { key: player.playerIndex, style: { marginLeft: '8px', marginBottom: '1px' } },
-                                `${player.playerName}: ${player.grossScore}`,
-                                player.strokes > 0 && ` (-${player.strokes})`,
-                                ` = ${player.netScore}`
-                            )
-                        ),
-                        teamInfo.otherTeamBest && e('div', { style: { marginLeft: '8px', fontSize: '10px', color: '#6b7280' } },
-                            `Best: ${teamInfo.otherTeamBest}`
+                        // Other team best score
+                        teamInfo.otherTeam.length > 0 && e('div', { style: { marginBottom: '4px' } },
+                            `👥 Other Team: ${getBestScoreInfo(teamInfo.otherTeam, teamInfo.otherTeamBest)}`
                         ),
                         // Points awarded
                         e('div', { 
                             style: { 
-                                marginTop: '4px', 
                                 paddingTop: '4px', 
                                 borderTop: '1px solid #e5e7eb',
                                 fontWeight: 'bold'
