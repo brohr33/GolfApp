@@ -262,91 +262,110 @@ window.Wolf = (function() {
                     }, '🌙 Blind Wolf (6 pts)')
                 ),
             
-            // FORCE TEST - Simple Wolf Selection Interface
-            e('div', { className: 'card mt-4', style: { background: '#fee2e2', border: '2px solid #dc2626' } },
-                e('h3', { className: 'font-semibold mb-4 text-center' }, '🔧 FORCE TEST - Wolf Selections'),
-                e('div', { style: { fontSize: '12px', marginBottom: '16px', textAlign: 'center' } },
-                    'This section should ALWAYS show up. If you see this, the component is rendering.'
-                ),
-                
-                // Force show hole 1 selection regardless of any logic
-                e('div', { 
-                    className: 'card',
+            // SIMPLIFIED FORCE TEST - Just show buttons
+            e('div', { 
+                style: { 
+                    background: '#fee2e2', 
+                    border: '2px solid #dc2626',
+                    padding: '20px',
+                    margin: '20px 0',
+                    borderRadius: '8px'
+                }
+            },
+                e('h3', { 
                     style: { 
-                        border: '2px solid #f59e0b',
-                        background: '#fef3c7'
-                    }
+                        fontSize: '18px', 
+                        fontWeight: 'bold', 
+                        textAlign: 'center', 
+                        marginBottom: '16px' 
+                    } 
+                }, '🔧 SIMPLE TEST - Wolf Selections'),
+                
+                e('div', { 
+                    style: { 
+                        fontSize: '14px', 
+                        textAlign: 'center', 
+                        marginBottom: '16px' 
+                    } 
+                }, 'If you can see this red box, the component is working. Try clicking a button:'),
+                
+                e('div', { 
+                    style: { 
+                        display: 'flex', 
+                        gap: '12px', 
+                        justifyContent: 'center',
+                        flexWrap: 'wrap'
+                    } 
                 },
-                    e('h4', { 
-                        className: 'font-bold mb-2 text-center',
-                        style: { color: '#ea580c' }
-                    }, 'FORCE TEST - Hole 1 - Wolf: Brent'),
+                    e('button', {
+                        onClick: () => {
+                            alert('Button works! Tom selected as partner.');
+                            console.log('Tom partner button clicked');
+                        },
+                        style: { 
+                            padding: '12px 20px', 
+                            fontSize: '16px',
+                            background: '#fed7aa',
+                            color: '#ea580c',
+                            border: '2px solid #ea580c',
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            fontWeight: 'bold'
+                        }
+                    }, 'PARTNER: Tom'),
                     
-                    e('div', { style: { padding: '16px' } },
-                        e('div', { 
-                            style: { 
-                                fontSize: '12px', 
-                                fontWeight: '500', 
-                                marginBottom: '8px' 
-                            } 
-                        }, 'Choose Partner:'),
-                        
-                        // Force show partner buttons
-                        ['Tom', 'Ju', 'Adam1'].map((name, index) => 
-                            e('button', {
-                                key: index,
-                                onClick: (evt) => {
-                                    evt.preventDefault();
-                                    console.log(`FORCE TEST: Clicked partner button for ${name}`);
-                                    alert(`Clicked ${name}! Check console for details.`);
-                                    onUpdateWolfSelection(1, {
-                                        mode: 'partner',
-                                        partnerIndex: index + 1,
-                                        isBlind: false
-                                    });
-                                },
-                                style: { 
-                                    padding: '12px 16px', 
-                                    fontSize: '14px',
-                                    background: '#fed7aa',
-                                    color: '#ea580c',
-                                    border: '2px solid #ea580c',
-                                    cursor: 'pointer',
-                                    margin: '4px',
-                                    borderRadius: '6px',
-                                    fontWeight: 'bold'
-                                }
-                            }, `PARTNER: ${name}`)
-                        ),
-                        
-                        e('div', { style: { marginTop: '12px' } },
-                            e('button', {
-                                onClick: (evt) => {
-                                    evt.preventDefault();
-                                    console.log('FORCE TEST: Clicked Lone Wolf');
-                                    alert('Clicked Lone Wolf! Check console.');
-                                    onUpdateWolfSelection(1, {
-                                        mode: 'lone',
-                                        partnerIndex: null,
-                                        isBlind: false
-                                    });
-                                },
-                                style: { 
-                                    padding: '12px 16px', 
-                                    fontSize: '14px',
-                                    background: '#dc2626',
-                                    color: 'white',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    margin: '4px',
-                                    borderRadius: '6px',
-                                    fontWeight: 'bold'
-                                }
-                            }, '🐺 LONE WOLF TEST')
-                        )
-                    )
+                    e('button', {
+                        onClick: () => {
+                            alert('Button works! Ju selected as partner.');
+                            console.log('Ju partner button clicked');
+                        },
+                        style: { 
+                            padding: '12px 20px', 
+                            fontSize: '16px',
+                            background: '#fed7aa',
+                            color: '#ea580c',
+                            border: '2px solid #ea580c',
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            fontWeight: 'bold'
+                        }
+                    }, 'PARTNER: Ju'),
+                    
+                    e('button', {
+                        onClick: () => {
+                            alert('Button works! Adam1 selected as partner.');
+                            console.log('Adam1 partner button clicked');
+                        },
+                        style: { 
+                            padding: '12px 20px', 
+                            fontSize: '16px',
+                            background: '#fed7aa',
+                            color: '#ea580c',
+                            border: '2px solid #ea580c',
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            fontWeight: 'bold'
+                        }
+                    }, 'PARTNER: Adam1'),
+                    
+                    e('button', {
+                        onClick: () => {
+                            alert('Button works! Lone Wolf selected.');
+                            console.log('Lone Wolf button clicked');
+                        },
+                        style: { 
+                            padding: '12px 20px', 
+                            fontSize: '16px',
+                            background: '#dc2626',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'pointer',
+                            borderRadius: '8px',
+                            fontWeight: 'bold'
+                        }
+                    }, '🐺 LONE WOLF')
                 )
-            ),
+            )
             
             // Wolf Selection Interface (separate from results)
             e('div', { className: 'card mt-4', style: { background: '#f9fafb' } },
