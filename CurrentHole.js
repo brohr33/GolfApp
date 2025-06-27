@@ -292,7 +292,10 @@ window.CurrentHole = (function() {
                             borderRadius: '4px',
                             cursor: 'pointer'
                         }
-                    }, 'Change Selection'')
+                    }, 'Change Selection')
+                )
+            );
+        };')
                 )
             );
         };')
