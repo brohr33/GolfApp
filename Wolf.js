@@ -687,16 +687,16 @@ window.Wolf = (function() {
                                 e('td', null,
                                     (() => {
                                         // Calculate net scores for all players on this hole
-                                        const hole = course.holes.find(h => h.hole === holeNumber);
-                                        if (!hole) return e('div', { style: { fontSize: '11px', color: '#6b7280', fontStyle: 'italic' } }, 'Hole not found');
+                                        const holeData = course.holes.find(h => h.hole === hole.hole);
+                                        if (!holeData) return e('div', { style: { fontSize: '11px', color: '#6b7280', fontStyle: 'italic' } }, 'Hole not found');
                                         
                                         const playerNetScores = players.map((player, index) => {
-                                            const grossScore = parseInt(scores[index]?.[holeNumber]);
+                                            const grossScore = parseInt(scores[index]?.[hole.hole]);
                                             if (!grossScore || grossScore <= 0) {
                                                 return { index, name: player.name, grossScore: null, netScore: null };
                                             }
                                             
-                                            const strokes = GolfScoring.getStrokesForHole(player.handicap, hole.handicap);
+                                            const strokes = GolfScoring.getStrokesForHole(player.handicap, holeData.handicap);
                                             const netScore = grossScore - strokes;
                                             
                                             return { 
