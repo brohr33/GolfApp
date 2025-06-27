@@ -12,8 +12,11 @@ window.Scorecard = (function() {
         playTens,
         playSkins,
         skinsMode,
+        playWolf,
+        wolfSelections,
         onUpdateScore, 
-        onToggleTens, 
+        onToggleTens,
+        onUpdateWolfSelection,
         onBack, 
         onNewRound 
     }) {
@@ -225,6 +228,15 @@ window.Scorecard = (function() {
                 skinsMode
             }),
             
+            // Wolf Game section
+            playWolf && window.Wolf && e(window.Wolf, {
+                players,
+                course,
+                scores,
+                wolfSelections,
+                onUpdateWolfSelection
+            }),
+
             // Navigation and actions
             e('div', { className: 'flex-between mt-8 no-print' },
                 e('button', {
