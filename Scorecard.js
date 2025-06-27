@@ -1,8 +1,8 @@
-// Main Scorecard Component
+// Main Scorecard Component with Tabbed Interface
 window.Scorecard = (function() {
     'use strict';
     
-    const { createElement: e } = React;
+    const { createElement: e, useState } = React;
     
     return function Scorecard({ 
         course, 
@@ -20,6 +20,8 @@ window.Scorecard = (function() {
         onBack, 
         onNewRound 
     }) {
+        
+        const [activeTab, setActiveTab] = useState('scorecard');
         
         const renderHoleRow = (hole, holeIndex) => {
             const isEvenRow = holeIndex % 2 === 0;
@@ -153,6 +155,107 @@ window.Scorecard = (function() {
             );
         };
         
+        const renderScorecardContent = () => {
+            return e('div', null,
+                // Scorecard table
+                e('div', { className: 'table-container mb-6' },
+                    e('table', null,
+                        // Table header
+                        e('thead', null,
+                            e('tr', null,
+                                e('th', { style: { textAlign: 'left' } }, 'Hole'),
+                                e('th', null, 'Par'),
+                                e('th', null, 'Yards'),
+                                e('th', null, 'HCP'),
+                                players.map((player, index) =>
+                                    e('th', { key: index },
+                                        e('div', null, GolfUtils.formatPlayerName(player.name, index)),
+                                        e('div', { 
+                                            style: { 
+                                                fontSize: '12px', 
+                                                fontWeight: 'normal', 
+                                                color: '#6b7280' 
+                                            } 
+                                        }, `HCP: ${player.handicap}`)
+                                    )
+                                )
+                            )
+                        ),
+                        // Table body
+                        e('tbody', null,
+                            // Front 9 holes
+                            course.holes.slice(0, 9).map((hole, index) => renderHoleRow(hole, index)),
+                            
+                            // Front 9 subtotal
+                            renderSubtotalRow('FRONT 9', course.holes.slice(0, 9), 'front-nine'),
+                            
+                            // Back 9 holes
+                            course.holes.slice(9, 18).map((hole, index) => renderHoleRow(hole, index + 9)),
+                            
+                            // Back 9 subtotal
+                            renderSubtotalRow('BACK 9', course.holes.slice(9, 18), 'back-nine'),
+                            
+                            // Total row
+                            renderTotalRow()
+                        )
+                    )
+                ),
+                
+                // Scoring help
+                e('div', { className: 'card mt-6' },
+                    e('h3', { className: 'font-semibold mb-3' }, '📊 Scoring Help'),
+                    e('div', { className: 'grid grid-3 gap-4 text-sm' },
+                        e('div', null,
+                            e('div', { className: 'font-medium mb-1' }, 'Gross Score'),
+                            e('div', { className: 'text-gray-600' }, 'Your actual strokes on each hole')
+                        ),
+                        e('div', null,
+                            e('div', { className: 'font-medium mb-1' }, 'Net Score'),
+                            e('div', { className: 'text-gray-600' }, 'Gross score minus handicap strokes')
+                        ),
+                        e('div', null,
+                            e('div', { className: 'font-medium mb-1' }, 'Handicap Strokes'),
+                            e('div', { className: 'text-gray-600' }, 'Extra strokes based on hole difficulty')
+                        )
+                    )
+                )
+            );
+        };
+        
+        const renderTabContent = () => {
+            switch (activeTab) {
+                case 'scorecard':
+                    return renderScorecardContent();
+                case 'tens':
+                    return playTens && window.GameOfTens ? 
+                        e(window.GameOfTens, {
+                            players,
+                            course,
+                            scores,
+                            tensSelections
+                        }) : null;
+                case 'skins':
+                    return playSkins && window.Skins ? 
+                        e(window.Skins, {
+                            players,
+                            course,
+                            scores,
+                            skinsMode
+                        }) : null;
+                case 'wolf':
+                    return playWolf && window.Wolf ? 
+                        e(window.Wolf, {
+                            players,
+                            course,
+                            scores,
+                            wolfSelections,
+                            onUpdateWolfSelection
+                        }) : null;
+                default:
+                    return renderScorecardContent();
+            }
+        };
+        
         return e('div', null,
             // Course header
             e('div', { className: 'card text-center mb-6' },
@@ -168,75 +271,26 @@ window.Scorecard = (function() {
                 )
             ),
             
-            // Scorecard table
-            e('div', { className: 'table-container mb-6' },
-                e('table', null,
-                    // Table header
-                    e('thead', null,
-                        e('tr', null,
-                            e('th', { style: { textAlign: 'left' } }, 'Hole'),
-                            e('th', null, 'Par'),
-                            e('th', null, 'Yards'),
-                            e('th', null, 'HCP'),
-                            players.map((player, index) =>
-                                e('th', { key: index },
-                                    e('div', null, GolfUtils.formatPlayerName(player.name, index)),
-                                    e('div', { 
-                                        style: { 
-                                            fontSize: '12px', 
-                                            fontWeight: 'normal', 
-                                            color: '#6b7280' 
-                                        } 
-                                    }, `HCP: ${player.handicap}`)
-                                )
-                            )
-                        )
-                    ),
-                    // Table body
-                    e('tbody', null,
-                        // Front 9 holes
-                        course.holes.slice(0, 9).map((hole, index) => renderHoleRow(hole, index)),
-                        
-                        // Front 9 subtotal
-                        renderSubtotalRow('FRONT 9', course.holes.slice(0, 9), 'front-nine'),
-                        
-                        // Back 9 holes
-                        course.holes.slice(9, 18).map((hole, index) => renderHoleRow(hole, index + 9)),
-                        
-                        // Back 9 subtotal
-                        renderSubtotalRow('BACK 9', course.holes.slice(9, 18), 'back-nine'),
-                        
-                        // Total row
-                        renderTotalRow()
-                    )
-                )
-            ),
-            
-            // Game of Tens section
-            playTens && window.GameOfTens && e(window.GameOfTens, {
-                players,
-                course,
-                scores,
-                tensSelections
+            // Tab Navigation
+            window.TabNavigation && e(window.TabNavigation, {
+                activeTab,
+                setActiveTab,
+                playTens,
+                playSkins,
+                playWolf
             }),
             
-            // Skins Game section
-            playSkins && window.Skins && e(window.Skins, {
-                players,
-                course,
-                scores,
-                skinsMode
-            }),
+            // Tab Content Container
+            e('div', { 
+                style: {
+                    background: 'white',
+                    borderRadius: '0 0 8px 8px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    padding: '24px',
+                    marginBottom: '24px'
+                }
+            }, renderTabContent()),
             
-            // Wolf Game section
-            playWolf && window.Wolf && e(window.Wolf, {
-                players,
-                course,
-                scores,
-                wolfSelections,
-                onUpdateWolfSelection
-            }),
-
             // Navigation and actions
             e('div', { className: 'flex-between mt-8 no-print' },
                 e('button', {
@@ -252,25 +306,6 @@ window.Scorecard = (function() {
                         onClick: onNewRound,
                         className: 'btn'
                     }, '🆕 New Round')
-                )
-            ),
-            
-            // Scoring help
-            e('div', { className: 'card mt-6' },
-                e('h3', { className: 'font-semibold mb-3' }, '📊 Scoring Help'),
-                e('div', { className: 'grid grid-3 gap-4 text-sm' },
-                    e('div', null,
-                        e('div', { className: 'font-medium mb-1' }, 'Gross Score'),
-                        e('div', { className: 'text-gray-600' }, 'Your actual strokes on each hole')
-                    ),
-                    e('div', null,
-                        e('div', { className: 'font-medium mb-1' }, 'Net Score'),
-                        e('div', { className: 'text-gray-600' }, 'Gross score minus handicap strokes')
-                    ),
-                    e('div', null,
-                        e('div', { className: 'font-medium mb-1' }, 'Handicap Strokes'),
-                        e('div', { className: 'text-gray-600' }, 'Extra strokes based on hole difficulty')
-                    )
                 )
             )
         );

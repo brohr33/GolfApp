@@ -6,7 +6,6 @@
     --skins-orange-light: #fed7aa;
     --wolf-yellow: #f59e0b;
     --wolf-yellow-light: #fef3c7;
-
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
     --gray-200: #e5e7eb;
@@ -151,11 +150,105 @@ body {
 .hidden { display: none !important; }
 .loading { opacity: 0.7; pointer-events: none; }
 
+/* Tab Navigation Styles */
+.tab-navigation {
+    background: var(--gray-50);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 8px 8px 0 8px;
+    margin-bottom: 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+
+.tab-list {
+    display: flex;
+    gap: 2px;
+    background: var(--gray-50);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.tab-list::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-button {
+    padding: 12px 20px;
+    border: none;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    cursor: pointer;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+    justify-content: center;
+    white-space: nowrap;
+    position: relative;
+}
+
+.tab-button:hover {
+    background: var(--gray-200);
+    color: var(--gray-800);
+}
+
+.tab-button.active {
+    background: var(--primary-green);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 -2px 8px rgba(5, 150, 105, 0.2);
+}
+
+.tab-button.active:hover {
+    background: var(--primary-green-dark);
+}
+
+.tab-content {
+    background: white;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    margin-bottom: 24px;
+    min-height: 400px;
+}
+
+/* Game-specific tab styles */
+.tab-button.tens {
+    border-top: 3px solid var(--secondary-purple);
+}
+
+.tab-button.tens.active {
+    background: var(--secondary-purple);
+}
+
+.tab-button.skins {
+    border-top: 3px solid var(--skins-orange);
+}
+
+.tab-button.skins.active {
+    background: var(--skins-orange);
+}
+
+.tab-button.wolf {
+    border-top: 3px solid var(--wolf-yellow);
+}
+
+.tab-button.wolf.active {
+    background: var(--wolf-yellow);
+    color: var(--gray-800);
+}
+
 /* Table styles */
 .table-container {
     overflow-x: auto;
     border-radius: var(--border-radius);
     border: 1px solid var(--gray-200);
+    background: white;
 }
 
 table {
@@ -188,6 +281,13 @@ th:first-child {
     text-align: center;
     border: 1px solid var(--gray-300);
     border-radius: 4px;
+    font-size: 14px;
+}
+
+.score-input:focus {
+    outline: none;
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
 }
 
 .tens-btn {
@@ -197,6 +297,7 @@ th:first-child {
     border: none;
     cursor: pointer;
     transition: all 0.2s;
+    min-width: 50px;
 }
 
 .tens-btn.selected {
@@ -207,6 +308,10 @@ th:first-child {
 .tens-btn:not(.selected) {
     background: var(--gray-100);
     color: var(--gray-600);
+}
+
+.tens-btn:hover:not(.selected):not(:disabled) {
+    background: var(--gray-200);
 }
 
 .tens-btn:disabled {
@@ -311,6 +416,17 @@ th:first-child {
     .card { padding: 16px; }
     .text-3xl { font-size: 1.875rem; }
     .btn { padding: 10px 20px; font-size: 14px; }
+    
+    /* Tab navigation responsive */
+    .tab-button {
+        padding: 10px 16px;
+        font-size: 13px;
+        min-width: 100px;
+    }
+    
+    .tab-content {
+        padding: 16px;
+    }
 }
 
 /* Additional styles for modular components */
@@ -439,7 +555,30 @@ th:first-child {
     text-align: center;
 }
 
-/* Responsive improvements for components */
+/* Tab-specific content styling */
+.tab-content .card {
+    margin-bottom: 0;
+    box-shadow: none;
+    border: 1px solid var(--gray-200);
+}
+
+.tab-content .card:last-child {
+    margin-bottom: 0;
+}
+
+/* Game result cards in tabs */
+.tab-content .skins-card,
+.tab-content .wolf-card {
+    margin: 0;
+    border-radius: var(--border-radius);
+}
+
+/* Enhanced table styles for tabs */
+.tab-content .table-container {
+    margin-bottom: 0;
+}
+
+/* Responsive tab improvements */
 @media (max-width: 768px) {
     .table-container {
         font-size: 14px;
@@ -453,10 +592,22 @@ th:first-child {
     .tens-btn {
         padding: 2px 6px;
         font-size: 10px;
+        min-width: 40px;
     }
     
     .wolf-hole-selection {
         min-height: 100px;
+    }
+    
+    .tab-list {
+        padding: 4px;
+        gap: 1px;
+    }
+    
+    .tab-button {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: 80px;
     }
 }
 
@@ -464,6 +615,16 @@ th:first-child {
 @media print {
     .no-print {
         display: none !important;
+    }
+    
+    .tab-navigation {
+        display: none !important;
+    }
+    
+    .tab-content {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
     }
     
     .card {
