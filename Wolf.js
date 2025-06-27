@@ -365,7 +365,31 @@ window.Wolf = (function() {
                         }
                     }, '🐺 LONE WOLF')
                 )
+            ),
+            
+            // Game explanation
+            e('div', { className: 'card mt-4', style: { background: '#f9fafb' } },
+                e('h3', { className: 'font-semibold mb-3' }, '🐺 Wolf Game Rules'),
+                e('div', { className: 'grid grid-4 gap-4 text-sm' },
+                    e('div', null,
+                        e('div', { className: 'font-medium mb-1' }, 'Wolf Rotation'),
+                        e('div', { className: 'text-gray-600' }, 'Each player takes turns being the Wolf (holes 17-18: last place player)')
+                    ),
+                    e('div', null,
+                        e('div', { className: 'font-medium mb-1' }, 'Partner Choice'),
+                        e('div', { className: 'text-gray-600' }, 'Wolf chooses a partner for 2v2 (2 pts each if win)')
+                    ),
+                    e('div', null,
+                        e('div', { className: 'font-medium mb-1' }, 'Lone Wolf'),
+                        e('div', { className: 'text-gray-600' }, 'Wolf plays alone vs everyone (4 pts if win, 1 pt each to others if lose)')
+                    ),
+                    e('div', null,
+                        e('div', { className: 'font-medium mb-1' }, 'Blind Wolf'),
+                        e('div', { className: 'text-gray-600' }, 'Declare Lone Wolf before seeing any shots (6 pts if win)')
+                    )
+                )
             )
+        );
             
             // Wolf Selection Interface (separate from results)
             e('div', { className: 'card mt-4', style: { background: '#f9fafb' } },
