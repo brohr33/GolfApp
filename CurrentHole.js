@@ -19,23 +19,13 @@ window.CurrentHole = (function() {
         
         const [currentHoleNumber, setCurrentHoleNumber] = useState(1);
         
-        // Auto-advance to next incomplete hole on mount
+        // Start at hole 1 by default (no auto-advance)
         useEffect(() => {
-            const findNextIncompleteHole = () => {
-                for (let holeNum = 1; holeNum <= 18; holeNum++) {
-                    const hasAllScores = players.every((_, playerIndex) => {
-                        const score = parseInt(scores[playerIndex]?.[holeNum]);
-                        return score && score > 0;
-                    });
-                    if (!hasAllScores) {
-                        return holeNum;
-                    }
-                }
-                return 18; // Default to 18 if all complete
-            };
-            
-            setCurrentHoleNumber(findNextIncompleteHole());
-        }, [scores, players]);
+            // Only set to hole 1 on initial load, don't auto-advance based on scores
+            if (currentHoleNumber === 1) {
+                setCurrentHoleNumber(1);
+            }
+        }, []);
         
         const currentHole = course.holes.find(h => h.hole === currentHoleNumber);
         
@@ -68,7 +58,7 @@ window.CurrentHole = (function() {
             }
         };
         
-        // Check if we should show the advance button
+        // Check if we should show the advance button (requires scores AND wolf selection if wolf enabled)
         const canAdvance = hasAllScores && (!playWolf || wolfSelection.mode);
         
         // Handle score input (no auto-advance)
@@ -94,7 +84,7 @@ window.CurrentHole = (function() {
             return totalGross - totalPar;
         };
         
-        // Get Wolf indicator for display
+        // Get Wolf indicator for display - always show if Wolf game enabled
         const getWolfIndicator = () => {
             if (!playWolf || wolfIndex === null) return null;
             
@@ -124,7 +114,7 @@ window.CurrentHole = (function() {
                         color: '#6b7280',
                         marginTop: '4px'
                     }
-                }, 'Choose your strategy after all scores are entered')
+                }, wolfSelection.mode ? 'Strategy selected!' : 'Choose your strategy below')
             );
         };
         
@@ -458,24 +448,24 @@ window.CurrentHole = (function() {
                 })
             ),
             
-            // Wolf selection (if enabled and all scores entered)
-            playWolf && hasAllScores && renderWolfSelection(),
+            // Wolf selection (if enabled - available anytime)
+            playWolf && renderWolfSelection(),
             
-            // Hole completion confirmation
-            hasAllScores && e('div', { 
+            // Hole completion confirmation - only show when ready to advance
+            canAdvance && e('div', { 
                 className: 'card text-center',
                 style: { 
-                    background: canAdvance ? '#d1fae5' : '#fef3c7',
-                    border: `2px solid ${canAdvance ? '#059669' : '#f59e0b'}`,
+                    background: '#d1fae5',
+                    border: '2px solid #059669',
                     marginTop: '20px'
                 }
             },
                 e('h3', { 
                     className: 'font-bold text-lg mb-3',
-                    style: { color: canAdvance ? '#059669' : '#f59e0b' }
-                }, canAdvance ? '✅ Hole Complete!' : '⏳ Waiting for Wolf Selection'),
+                    style: { color: '#059669' }
+                }, '✅ Hole Complete!'),
                 
-                canAdvance && currentHoleNumber < 18 && e('button', {
+                currentHoleNumber < 18 && e('button', {
                     onClick: advanceToNextHole,
                     className: 'btn',
                     style: { 
@@ -486,7 +476,7 @@ window.CurrentHole = (function() {
                     }
                 }, `Continue to Hole ${currentHoleNumber + 1} →`),
                 
-                canAdvance && currentHoleNumber === 18 && e('div', { 
+                currentHoleNumber === 18 && e('div', { 
                     style: {
                         background: '#d1fae5',
                         color: '#059669',
