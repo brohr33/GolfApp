@@ -236,7 +236,7 @@ window.Scorecard = (function() {
                 wolfSelections,
                 onUpdateWolfSelection
             }),
-            
+
             // Navigation and actions
             e('div', { className: 'flex-between mt-8 no-print' },
                 e('button', {

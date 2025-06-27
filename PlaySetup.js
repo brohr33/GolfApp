@@ -15,9 +15,6 @@ window.PlayerSetup = (function() {
         setPlaySkins,
         skinsMode,
         setSkinsMode,
-        playWolf,
-        setPlayWolf,
-
         onContinue 
     }) {
         
@@ -28,10 +25,6 @@ window.PlayerSetup = (function() {
         };
         
         const validateSetup = () => {
-            // Wolf requires exactly 4 players
-            if (playWolf && numPlayers !== 4) {
-                return false;
-            }
             return players.some(player => 
                 GolfUtils.validatePlayerName(player.name)
             );
@@ -55,14 +48,6 @@ window.PlayerSetup = (function() {
             }
         };
         
-        // Auto-adjust number of players if Wolf is enabled
-        const handleWolfToggle = (enabled) => {
-            if (enabled && numPlayers !== 4) {
-                setNumPlayers(4);
-            }
-            setPlayWolf(enabled);
-        };
-
         return e('div', { className: 'card' },
             e('div', { className: 'text-center mb-8' },
                 e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '⛳'),
@@ -79,21 +64,15 @@ window.PlayerSetup = (function() {
                             e('button', {
                                 key: num,
                                 onClick: () => setNumPlayers(num),
-                                disabled: playWolf && num !== 4, // Wolf requires 4 players
                                 className: `btn ${numPlayers === num ? '' : 'btn-secondary'}`,
                                 style: { 
                                     padding: '12px 16px',
                                     fontSize: '14px',
-                                    fontWeight: numPlayers === num ? '600' : '500',
-                                    opacity: playWolf && num !== 4 ? 0.5 : 1
+                                    fontWeight: numPlayers === num ? '600' : '500'
                                 }
                             }, `${num} Player${num > 1 ? 's' : ''}`)
                         )
-                    ),
-                    playWolf && numPlayers !== 4 && e('div', { 
-                        className: 'text-sm text-orange-600 mt-2',
-                        style: { color: '#ea580c' }
-                    }, '🐺 Wolf game requires exactly 4 players')
+                    )
                 ),
                 
                 // Player Details Forms
@@ -197,30 +176,6 @@ window.PlayerSetup = (function() {
                     )
                 ),
                 
-                // Wolf Game Toggle
-                e('div', { 
-                    className: 'card', 
-                    style: { background: '#fef3c7', border: '2px solid #f59e0b' } 
-                },
-                    e('div', { className: 'flex-between' },
-                        e('div', null,
-                            e('h3', { className: 'font-semibold text-lg mb-1' }, '🐺 Wolf Game'),
-                            e('p', { className: 'text-gray-600' }, 'Strategic partnerships and lone wolf battles'),
-                            numPlayers !== 4 && e('p', { 
-                                className: 'text-sm mt-1',
-                                style: { color: '#ea580c' }
-                            }, 'Requires exactly 4 players')
-                        ),
-                        e('div', {
-                            className: `toggle ${playWolf ? 'active' : ''}`,
-                            style: { background: playWolf ? '#f59e0b' : '#d1d5db' },
-                            onClick: () => handleWolfToggle(!playWolf)
-                        },
-                            e('div', { className: 'toggle-thumb' })
-                        )
-                    )
-                ),
-
                 // Continue Button
                 e('button', {
                     onClick: onContinue,
@@ -231,36 +186,17 @@ window.PlayerSetup = (function() {
             ),
             
             // Game Info
-            (playTens || playSkins || playWolf) && e('div', { className: 'status status-info mt-4' },
-                (() => {
-                    const activeGames = [];
-                    if (playTens) activeGames.push('Game of Tens');
-                    if (playSkins) activeGames.push('Skins');
-                    if (playWolf) activeGames.push('Wolf');
-                    
-                    if (activeGames.length > 1) {
-                        return e('div', null,
-                            e('strong', null, 'Multiple Games: '),
-                            `Playing ${activeGames.join(', ')}! Multiple ways to compete and win.`
-                        );
-                    } else if (playTens) {
-                        return e('div', null,
-                            e('strong', null, 'Game of Tens: '),
-                            'Each player will select their best 10 holes after the round.'
-                        );
-                    } else if (playSkins) {
-                        return e('div', null,
-                            e('strong', null, 'Skins Game: '),
-                            `Lowest net score wins each hole. Ties are ${skinsMode === 'push' ? 'pushed (no winner)' : skinsMode === 'carryover' ? 'carried over to next hole' : 'nullified (no winner, no carryover)'}.`
-                        );
-                    } else if (playWolf) {
-                        return e('div', null,
-                            e('strong', null, 'Wolf Game: '),
-                            'Players rotate as the Wolf, choosing partners or going alone for strategic point battles.'
-                        );
-                    }
-                })()
-
+            (playTens || playSkins) && e('div', { className: 'status status-info mt-4' },
+                playTens && playSkins ? e('div', null,
+                    e('strong', null, 'Multiple Games: '),
+                    'Playing both Game of Tens and Skins! You\'ll have multiple ways to compete.'
+                ) : playTens ? e('div', null,
+                    e('strong', null, 'Game of Tens: '),
+                    'Each player will select their best 10 holes after the round.'
+                ) : e('div', null,
+                    e('strong', null, 'Skins Game: '),
+                    `Lowest net score wins each hole. Ties are ${skinsMode === 'push' ? 'pushed (no winner)' : skinsMode === 'carryover' ? 'carried over to next hole' : 'nullified (no winner, no carryover)'}.`
+                )
             )
         );
     };

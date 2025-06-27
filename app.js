@@ -22,6 +22,7 @@
     // Check if all React components are loaded
     const checkComponents = () => {
         const requiredComponents = ['PlayerSetup', 'CourseSearch', 'Scorecard', 'GameOfTens', 'Skins', 'Wolf'];
+
         const missing = [];
         
         for (const component of requiredComponents) {
@@ -94,6 +95,7 @@
                 const [tensSelections, setTensSelections] = useState({});
                 const [playTens, setPlayTens] = useState(false);
                 
+
                 // Skins game state
                 const [playSkins, setPlaySkins] = useState(false);
                 const [skinsMode, setSkinsMode] = useState('push'); // 'push', 'carryover', 'null'
@@ -101,7 +103,7 @@
                 // Wolf game state
                 const [playWolf, setPlayWolf] = useState(false);
                 const [wolfSelections, setWolfSelections] = useState({}); // { holeNumber: { mode: 'partner'|'lone', partnerIndex: number|null, isBlind: boolean } }
-                
+
                 // Initialize players when count changes
                 useEffect(() => {
                     const newPlayers = Array.from({ length: numPlayers }, (_, i) => 
@@ -246,6 +248,7 @@
                     setPlaySkins(false);
                     setSkinsMode('push');
                     setPlayWolf(false);
+
                     GolfUtils.saveToStorage('current-round', null);
                 };
                 
@@ -262,6 +265,7 @@
                         setPlaySkins,
                         skinsMode,
                         setSkinsMode,
+
                         playWolf,
                         setPlayWolf,
                         onContinue: () => setStep('course-search')
@@ -291,6 +295,7 @@
                         skinsMode,
                         playWolf,
                         wolfSelections,
+                      
                         onUpdateScore: updateScore,
                         onToggleTens: toggleTensSelection,
                         onUpdateWolfSelection: updateWolfSelection,

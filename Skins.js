@@ -1,4 +1,4 @@
-// Skins Game Component - FIXED VERSION
+
 window.Skins = (function() {
     'use strict';
     
@@ -19,8 +19,10 @@ window.Skins = (function() {
                     holeScores.push({
                         playerIndex,
                         netScore,
+
                         grossScore: score,
                         strokesReceived: strokes
+
                     });
                 }
             });
@@ -135,7 +137,7 @@ window.Skins = (function() {
                 return scoreData.grossScore.toString();
             }
         };
-        
+
         const skinsResults = calculateSkinsResults();
         const playerTotals = calculatePlayerTotals(skinsResults);
         
@@ -185,7 +187,7 @@ window.Skins = (function() {
             },
                 e('td', { style: { fontWeight: 'bold', textAlign: 'left' } }, hole.hole),
                 e('td', null, hole.par),
-                
+   
                 // Display scores for each player in consistent order
                 players.map((player, playerIndex) => {
                     const scoreData = playerScoreMap[playerIndex];
@@ -204,7 +206,7 @@ window.Skins = (function() {
                         return e('td', { key: playerIndex }, '—');
                     }
                 }),
-                
+
                 e('td', { 
                     style: { 
                         fontWeight: 'bold',
@@ -339,3 +341,4 @@ window.Skins = (function() {
         );
     };
 })();
+
