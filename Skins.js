@@ -1,4 +1,4 @@
-// Skins Game Component
+// Skins Game Component - FIXED VERSION
 window.Skins = (function() {
     'use strict';
     
@@ -19,7 +19,8 @@ window.Skins = (function() {
                     holeScores.push({
                         playerIndex,
                         netScore,
-                        grossScore: score
+                        grossScore: score,
+                        strokesReceived: strokes
                     });
                 }
             });
@@ -126,6 +127,15 @@ window.Skins = (function() {
             }
         };
         
+        // Format score display as "gross (net)" when handicap strokes apply
+        const formatScoreDisplay = (scoreData) => {
+            if (scoreData.strokesReceived > 0) {
+                return `${scoreData.grossScore} (${scoreData.netScore})`;
+            } else {
+                return scoreData.grossScore.toString();
+            }
+        };
+        
         const skinsResults = calculateSkinsResults();
         const playerTotals = calculatePlayerTotals(skinsResults);
         
@@ -163,27 +173,38 @@ window.Skins = (function() {
                 statusColor = '#6b7280';
             }
             
+            // Create a map of player scores for this hole for easy lookup
+            const playerScoreMap = {};
+            result.scores.forEach(scoreData => {
+                playerScoreMap[scoreData.playerIndex] = scoreData;
+            });
+            
             return e('tr', { 
                 key: hole.hole,
                 style: { background: hole.hole % 2 === 0 ? '#f9fafb' : 'white' }
             },
                 e('td', { style: { fontWeight: 'bold', textAlign: 'left' } }, hole.hole),
                 e('td', null, hole.par),
-                result.scores.map((scoreData, index) => {
-                    const player = players[scoreData.playerIndex];
-                    const isWinner = result.winner === scoreData.playerIndex;
-                    return e('td', { 
-                        key: scoreData.playerIndex,
-                        style: { 
-                            fontWeight: isWinner ? 'bold' : 'normal',
-                            color: isWinner ? '#059669' : '#374151'
-                        }
-                    }, scoreData.netScore);
+                
+                // Display scores for each player in consistent order
+                players.map((player, playerIndex) => {
+                    const scoreData = playerScoreMap[playerIndex];
+                    const isWinner = result.winner === playerIndex;
+                    
+                    if (scoreData) {
+                        return e('td', { 
+                            key: playerIndex,
+                            style: { 
+                                fontWeight: isWinner ? 'bold' : 'normal',
+                                color: isWinner ? '#059669' : '#374151',
+                                fontSize: '14px'
+                            }
+                        }, formatScoreDisplay(scoreData));
+                    } else {
+                        return e('td', { key: playerIndex }, '—');
+                    }
                 }),
-                // Fill empty cells for players who didn't score
-                Array.from({ length: players.length - result.scores.length }, (_, i) => 
-                    e('td', { key: `empty-${i}` }, '—')
-                ),
+                
                 e('td', { 
                     style: { 
                         fontWeight: 'bold',
@@ -304,6 +325,14 @@ window.Skins = (function() {
                             skinsMode === 'carryover' ? 'Tied holes carry the skin to the next hole' :
                             'Tied holes have no winner and no carryover'
                         )
+                    )
+                ),
+                
+                // Add scoring format explanation
+                e('div', { className: 'mt-3 pt-3', style: { borderTop: '1px solid #e5e7eb' } },
+                    e('div', { className: 'font-medium mb-1 text-sm' }, '📊 Score Format'),
+                    e('div', { className: 'text-gray-600 text-sm' }, 
+                        'Scores shown as "gross (net)" when handicap strokes apply. Example: "5 (4)" means 5 gross strokes, 4 net strokes after 1 handicap stroke.'
                     )
                 )
             )
