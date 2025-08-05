@@ -119,7 +119,7 @@ window.GameOfTens = (function() {
                         e('span', { className: 'font-bold' }, tensData.parTotal || 0)
                     ),
                     
-                    tensData.selectedHoles === 10 && e('div', { 
+                    tensData.selectedHoles === 0 && e('div', { 
                         className: 'flex-between',
                         style: { 
                             borderTop: '1px solid #e5e7eb', 
