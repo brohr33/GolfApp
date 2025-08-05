@@ -91,7 +91,7 @@ window.GameOfTens = (function() {
                         e('span', { 
                             className: 'font-bold',
                             style: { 
-                                color: tensData.selectedHoles === 10 ? '#059669' : '#dc2626' 
+                                color: tensData.selectedHoles === 0 ? '#059669' : '#dc2626' 
                             }
                         }, `${tensData.selectedHoles}/10`)
                     ),
