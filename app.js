@@ -1,4 +1,4 @@
-// Main Golf Scorecard Application Controller
+// Main Golf Scorecard Application Controller - Multiplayer Version
 (function() {
     'use strict';
     
@@ -7,7 +7,7 @@
     
     // Check if all required modules are loaded
     const checkModules = () => {
-        const requiredModules = ['GolfUtils', 'GolfAPI', 'CourseData', 'GolfScoring'];
+        const requiredModules = ['GolfUtils', 'GolfAPI', 'CourseData', 'GolfScoring', 'FirebaseConfig', 'GameSync'];
         const missing = [];
         
         for (const module of requiredModules) {
@@ -55,6 +55,18 @@
                 throw new Error(`Missing components: ${missingComponents.join(', ')}`);
             }
             
+            // Initialize Firebase
+            GolfUtils.updateStatus('Initializing Firebase...', 'info');
+            const firebaseInitialized = FirebaseConfig.initialize();
+            
+            if (FirebaseConfig.isDemoMode()) {
+                GolfUtils.updateStatus('Running in demo mode (local only)', 'warning');
+            } else if (firebaseInitialized) {
+                GolfUtils.updateStatus('Firebase connected successfully', 'success');
+            } else {
+                GolfUtils.updateStatus('Firebase unavailable - running locally', 'warning');
+            }
+            
             GolfUtils.updateStatus('Starting application...', 'success');
             setTimeout(startGolfApp, 500);
             
@@ -72,7 +84,7 @@
         }
     };
     
-    // Main Golf Application
+    // Main Golf Application with Multiplayer Support
     const startGolfApp = () => {
         try {
             const { useState, useEffect, createElement: e } = React;
@@ -81,6 +93,9 @@
             const GolfScorecardApp = () => {
                 // State management
                 const [step, setStep] = useState('setup');
+                const [gameId, setGameId] = useState(null);
+                const [isHost, setIsHost] = useState(false);
+                const [participants, setParticipants] = useState([]);
                 const [numPlayers, setNumPlayers] = useState(2);
                 const [players, setPlayers] = useState([
                     { name: '', handicap: 0 },
@@ -93,14 +108,13 @@
                 const [scores, setScores] = useState({});
                 const [tensSelections, setTensSelections] = useState({});
                 const [playTens, setPlayTens] = useState(false);
-                
-                // Skins game state
                 const [playSkins, setPlaySkins] = useState(false);
-                const [skinsMode, setSkinsMode] = useState('push'); // 'push', 'carryover', 'null'
-                
-                // Wolf game state
+                const [skinsMode, setSkinsMode] = useState('push');
                 const [playWolf, setPlayWolf] = useState(false);
-                const [wolfSelections, setWolfSelections] = useState({}); // { holeNumber: { mode: 'partner'|'lone', partnerIndex: number|null, isBlind: boolean } }
+                const [wolfSelections, setWolfSelections] = useState({});
+                const [connectionStatus, setConnectionStatus] = useState('disconnected');
+                const [joinGameId, setJoinGameId] = useState('');
+                const [showJoinGame, setShowJoinGame] = useState(false);
                 
                 // Initialize players when count changes
                 useEffect(() => {
@@ -110,39 +124,469 @@
                     setPlayers(newPlayers);
                 }, [numPlayers]);
                 
-                // Load saved data on mount
+                // Check for existing game on mount
                 useEffect(() => {
-                    const savedData = GolfUtils.loadFromStorage('current-round');
-                    if (savedData) {
-                        setStep(savedData.step || 'setup');
-                        setPlayers(savedData.players || players);
-                        setPlayTens(savedData.playTens || false);
-                        setPlaySkins(savedData.playSkins || false);
-                        setSkinsMode(savedData.skinsMode || 'push');
-                        setPlayWolf(savedData.playWolf || false);
-                        setWolfSelections(savedData.wolfSelections || {});
-                        if (savedData.selectedCourse) setSelectedCourse(savedData.selectedCourse);
-                        if (savedData.scores) setScores(savedData.scores);
-                        if (savedData.tensSelections) setTensSelections(savedData.tensSelections);
+                    const urlGameId = GameSync.getGameIdFromURL();
+                    if (urlGameId) {
+                        setJoinGameId(urlGameId);
+                        handleJoinGame(urlGameId);
+                    } else {
+                        // Sync to multiplayer game
+                    if (gameId) {
+                        debouncedUpdateTens(newTensSelections);
+                    }
+                };
+                
+                // Update wolf selection for a hole
+                const updateWolfSelection = async (holeNumber, selection) => {
+                    const newWolfSelections = {
+                        ...wolfSelections,
+                        [holeNumber]: selection
+                    };
+                    setWolfSelections(newWolfSelections);
+                    
+                    // Sync to multiplayer game immediately (less frequent updates)
+                    if (gameId) {
+                        try {
+                            await GameSync.updateWolfSelections(newWolfSelections);
+                        } catch (error) {
+                            console.error('Failed to sync wolf selections:', error);
+                        }
+                    }
+                };
+                
+                // Start new round
+                const startNewRound = () => {
+                    // Stop current game sync
+                    if (gameId) {
+                        GameSync.stopSync();
+                    }
+                    
+                    // Reset all state
+                    setStep('setup');
+                    setGameId(null);
+                    setIsHost(false);
+                    setParticipants([]);
+                    setScores({});
+                    setTensSelections({});
+                    setWolfSelections({});
+                    setSelectedCourse(null);
+                    setCourses([]);
+                    setSearchQuery('');
+                    setPlayTens(false);
+                    setPlaySkins(false);
+                    setSkinsMode('push');
+                    setPlayWolf(false);
+                    setConnectionStatus('disconnected');
+                    setJoinGameId('');
+                    setShowJoinGame(false);
+                    
+                    // Clear URL
+                    window.history.replaceState({}, '', window.location.pathname);
+                    GolfUtils.saveToStorage('current-round', null);
+                };
+                
+                // Continue to course search and create multiplayer game
+                const continueToSearch = async () => {
+                    if (!gameId) {
+                        await createNewGame();
+                    } else {
+                        // Update existing game
+                        await updateGameState({
+                            step: 'course-search',
+                            players,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf
+                        });
+                    }
+                    setStep('course-search');
+                };
+                
+                // Connection status component
+                const renderConnectionStatus = () => {
+                    if (!gameId) return null;
+                    
+                    let statusIcon = '🔴';
+                    let statusText = 'Disconnected';
+                    let statusColor = '#dc2626';
+                    
+                    if (connectionStatus === 'connected') {
+                        statusIcon = '🟢';
+                        statusText = FirebaseConfig.isDemoMode() ? 'Demo Mode' : 'Connected';
+                        statusColor = '#059669';
+                    } else if (connectionStatus === 'connecting') {
+                        statusIcon = '🟡';
+                        statusText = 'Connecting...';
+                        statusColor = '#d97706';
+                    }
+                    
+                    return e('div', { 
+                        style: { 
+                            position: 'fixed',
+                            top: '20px',
+                            right: '20px',
+                            background: 'white',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            color: statusColor,
+                            zIndex: 1000,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }
+                    },
+                        statusIcon,
+                        statusText,
+                        gameId && e('div', { 
+                            style: { 
+                                marginLeft: '8px',
+                                fontSize: '10px',
+                                color: '#6b7280'
+                            }
+                        }, `ID: ${gameId}`)
+                    );
+                };
+                
+                // Game sharing component
+                const renderGameSharing = () => {
+                    if (!gameId || step === 'setup') return null;
+                    
+                    const sharingURL = GameSync.getSharingURL();
+                    
+                    return e('div', { className: 'card mb-4', style: { background: '#ecfdf5', border: '2px solid #059669' } },
+                        e('h3', { className: 'font-semibold text-lg mb-3' }, '🔗 Share This Game'),
+                        e('div', { className: 'grid gap-3' },
+                            e('div', null,
+                                e('label', { className: 'block font-medium mb-1' }, 'Game URL (share with friends):'),
+                                e('div', { className: 'flex gap-2' },
+                                    e('input', {
+                                        type: 'text',
+                                        value: sharingURL,
+                                        readOnly: true,
+                                        className: 'input',
+                                        style: { flex: '1', fontSize: '14px' },
+                                        onClick: (e) => e.target.select()
+                                    }),
+                                    e('button', {
+                                        onClick: () => {
+                                            navigator.clipboard.writeText(sharingURL);
+                                            // Simple feedback
+                                            const btn = event.target;
+                                            const originalText = btn.textContent;
+                                            btn.textContent = '✓ Copied!';
+                                            setTimeout(() => {
+                                                btn.textContent = originalText;
+                                            }, 2000);
+                                        },
+                                        className: 'btn btn-secondary'
+                                    }, '📋 Copy')
+                                )
+                            ),
+                            e('div', { className: 'text-sm text-gray-600' },
+                                `Game ID: ${gameId} • ${participants.length} player${participants.length !== 1 ? 's' : ''} connected`
+                            )
+                        )
+                    );
+                };
+                
+                // Join game component
+                const renderJoinGame = () => {
+                    return e('div', { className: 'card text-center' },
+                        e('div', { style: { fontSize: '4rem', marginBottom: '1rem' } }, '🔗'),
+                        e('h2', { className: 'text-2xl font-bold mb-4' }, 'Join Golf Game'),
+                        e('div', { className: 'grid gap-4' },
+                            e('div', null,
+                                e('label', { className: 'block font-medium mb-2' }, 'Enter Game ID:'),
+                                e('input', {
+                                    type: 'text',
+                                    value: joinGameId,
+                                    onChange: (e) => setJoinGameId(e.target.value.toUpperCase()),
+                                    placeholder: 'ABC123',
+                                    className: 'input',
+                                    style: { textAlign: 'center', fontSize: '18px', letterSpacing: '2px' }
+                                })
+                            ),
+                            e('div', { className: 'flex gap-3' },
+                                e('button', {
+                                    onClick: () => {
+                                        setShowJoinGame(false);
+                                        setJoinGameId('');
+                                    },
+                                    className: 'btn btn-secondary',
+                                    style: { flex: '1' }
+                                }, 'Cancel'),
+                                e('button', {
+                                    onClick: () => handleJoinGame(joinGameId),
+                                    disabled: !joinGameId.trim() || loading,
+                                    className: 'btn',
+                                    style: { flex: '1' }
+                                }, loading ? 'Joining...' : 'Join Game')
+                            )
+                        )
+                    );
+                };
+                
+                // Render based on current step
+                if (showJoinGame) {
+                    return e('div', null,
+                        renderConnectionStatus(),
+                        renderJoinGame()
+                    );
+                }
+                
+                if (step === 'setup') {
+                    return e('div', null,
+                        renderConnectionStatus(),
+                        e(window.PlayerSetup, {
+                            numPlayers,
+                            setNumPlayers,
+                            players,
+                            setPlayers,
+                            playTens,
+                            setPlayTens,
+                            playSkins,
+                            setPlaySkins,
+                            skinsMode,
+                            setSkinsMode,
+                            playWolf,
+                            setPlayWolf,
+                            onContinue: continueToSearch,
+                            gameId,
+                            onCreateGame: async () => {
+                                console.log('Create game button clicked');
+                                await createNewGame();
+                            },
+                            onJoinGame: () => {
+                                console.log('Join game button clicked');
+                                setShowJoinGame(true);
+                            }
+                        })
+                    );
+                }
+                
+                if (step === 'course-search') {
+                    return e('div', null,
+                        renderConnectionStatus(),
+                        renderGameSharing(),
+                        e(window.CourseSearch, {
+                            searchQuery,
+                            setSearchQuery,
+                            loading,
+                            courses,
+                            onSearch: searchCourses,
+                            onSelectCourse: selectCourse,
+                            onBack: () => {
+                                setStep('setup');
+                                if (gameId) updateGameState({ step: 'setup' });
+                            }
+                        })
+                    );
+                }
+                
+                if (step === 'scorecard' && selectedCourse) {
+                    return e('div', null,
+                        renderConnectionStatus(),
+                        renderGameSharing(),
+                        e(window.Scorecard, {
+                            course: selectedCourse,
+                            players,
+                            scores,
+                            tensSelections,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf,
+                            wolfSelections,
+                            onUpdateScore: updateScore,
+                            onToggleTens: toggleTensSelection,
+                            onUpdateWolfSelection: updateWolfSelection,
+                            onBack: () => {
+                                setStep('course-search');
+                                if (gameId) updateGameState({ step: 'course-search' });
+                            },
+                            onNewRound: startNewRound,
+                            gameId,
+                            isHost,
+                            connectionStatus
+                        })
+                    );
+                }
+                
+                return e('div', null,
+                    renderConnectionStatus(),
+                    e('div', { className: 'card text-center' }, 
+                        e('h1', { className: 'text-xl font-bold mb-4' }, 'Golf Scorecard Pro'),
+                        e('p', { className: 'text-gray-600 mb-6' }, 'Ready to start your round!'),
+                        e('div', { className: 'flex gap-3 justify-center' },
+                            e('button', {
+                                onClick: () => setStep('setup'),
+                                className: 'btn'
+                            }, '🆕 Start New Round'),
+                            e('button', {
+                                onClick: () => setShowJoinGame(true),
+                                className: 'btn btn-secondary'
+                            }, '🔗 Join Game')
+                        )
+                    )
+                );
+            };
+            
+            // Render the application
+            GolfUtils.showApp();
+            ReactDOM.render(e(GolfScorecardApp), GolfUtils.$('app'));
+            console.log('✅ Golf Scorecard Pro loaded successfully with multiplayer support!');
+            
+        } catch (error) {
+            GolfUtils.handleError(error, 'startGolfApp');
+            GolfUtils.showError();
+        }
+    };
+    
+    // Wait for DOM to be ready, then initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    } else {
+        initializeApp();
+    }
+})(); Try to load local game
+                        const savedData = GolfUtils.loadFromStorage('current-round');
+                        if (savedData && !savedData.gameId) {
+                            // Old local game - load it
+                            loadGameState(savedData);
+                        }
                     }
                 }, []);
                 
-                // Save state when it changes
-                useEffect(() => {
-                    const dataToSave = {
-                        step,
-                        players,
-                        playTens,
-                        playSkins,
-                        skinsMode,
-                        playWolf,
-                        wolfSelections,
-                        selectedCourse,
-                        scores,
-                        tensSelections
-                    };
-                    GolfUtils.saveToStorage('current-round', dataToSave);
-                }, [step, players, playTens, playSkins, skinsMode, playWolf, wolfSelections, selectedCourse, scores, tensSelections]);
+                // Game state update handler
+                const handleGameUpdate = (gameData) => {
+                    setConnectionStatus('connected');
+                    loadGameState(gameData);
+                };
+                
+                // Load game state from data
+                const loadGameState = (gameData) => {
+                    setStep(gameData.step || 'setup');
+                    setPlayers(gameData.players || players);
+                    setPlayTens(gameData.playTens || false);
+                    setPlaySkins(gameData.playSkins || false);
+                    setSkinsMode(gameData.skinsMode || 'push');
+                    setPlayWolf(gameData.playWolf || false);
+                    setWolfSelections(gameData.wolfSelections || {});
+                    if (gameData.selectedCourse) setSelectedCourse(gameData.selectedCourse);
+                    if (gameData.scores) setScores(gameData.scores);
+                    if (gameData.tensSelections) setTensSelections(gameData.tensSelections);
+                    if (gameData.gameId) {
+                        setGameId(gameData.gameId);
+                        GameSync.setGameIdInURL(gameData.gameId);
+                    }
+                };
+                
+                // Create new multiplayer game
+                const createNewGame = async () => {
+                    console.log('createNewGame function called');
+                    try {
+                        setLoading(true);
+                        console.log('Creating game with data:', {
+                            step,
+                            players,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf
+                        });
+                        
+                        const gameData = {
+                            step,
+                            players,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf,
+                            wolfSelections,
+                            selectedCourse,
+                            scores,
+                            tensSelections
+                        };
+                        
+                        console.log('Calling GameSync.createGame...');
+                        const newGameId = await GameSync.createGame(gameData);
+                        console.log('Game created with ID:', newGameId);
+                        
+                        setGameId(newGameId);
+                        setIsHost(true);
+                        GameSync.setHost(true);
+                        GameSync.setGameIdInURL(newGameId);
+                        
+                        console.log('Starting sync...');
+                        // Start syncing
+                        GameSync.startSync(newGameId, handleGameUpdate);
+                        setConnectionStatus('connected');
+                        console.log('Game creation complete');
+                        
+                    } catch (error) {
+                        console.error('Failed to create game:', error);
+                        setConnectionStatus('error');
+                        alert('Failed to create game: ' + error.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                // Join existing game
+                const handleJoinGame = async (targetGameId) => {
+                    try {
+                        setLoading(true);
+                        const gameData = await GameSync.joinGame(targetGameId);
+                        
+                        setGameId(targetGameId);
+                        setIsHost(false);
+                        GameSync.setHost(false);
+                        GameSync.setGameIdInURL(targetGameId);
+                        
+                        // Load the game state
+                        loadGameState(gameData);
+                        
+                        // Start syncing
+                        GameSync.startSync(targetGameId, handleGameUpdate);
+                        setConnectionStatus('connected');
+                        setShowJoinGame(false);
+                        
+                    } catch (error) {
+                        console.error('Failed to join game:', error);
+                        setConnectionStatus('error');
+                        alert('Failed to join game. Please check the game ID and try again.');
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                // Debounced update functions to avoid too many database writes
+                const debouncedUpdateScores = GolfUtils.debounce(
+                    (newScores) => GameSync.updateScores(newScores), 
+                    500
+                );
+                
+                const debouncedUpdateTens = GolfUtils.debounce(
+                    (newTensSelections) => GameSync.updateTensSelections(newTensSelections), 
+                    300
+                );
+                
+                // Update game state (immediate for important changes)
+                const updateGameState = async (updates) => {
+                    if (gameId) {
+                        try {
+                            await GameSync.updateGame(updates);
+                        } catch (error) {
+                            console.error('Failed to sync game state:', error);
+                            setConnectionStatus('error');
+                        }
+                    }
+                };
                 
                 // Course search with API integration
                 const searchCourses = async () => {
@@ -170,7 +614,7 @@
                 };
                 
                 // Select course and initialize scoring
-                const selectCourse = (course) => {
+                const selectCourse = async (course) => {
                     setSelectedCourse(course);
                     
                     const initialScores = {};
@@ -195,17 +639,34 @@
                     setTensSelections(initialTensSelections);
                     setWolfSelections(initialWolfSelections);
                     setStep('scorecard');
+                    
+                    // Update multiplayer game if connected
+                    if (gameId) {
+                        await updateGameState({
+                            selectedCourse: course,
+                            scores: initialScores,
+                            tensSelections: initialTensSelections,
+                            wolfSelections: initialWolfSelections,
+                            step: 'scorecard'
+                        });
+                    }
                 };
                 
                 // Update player score
                 const updateScore = (playerIndex, hole, score) => {
-                    setScores(prev => ({
-                        ...prev,
+                    const newScores = {
+                        ...scores,
                         [playerIndex]: {
-                            ...prev[playerIndex],
+                            ...scores[playerIndex],
                             [hole]: score
                         }
-                    }));
+                    };
+                    setScores(newScores);
+                    
+                    // Sync to multiplayer game
+                    if (gameId) {
+                        debouncedUpdateScores(newScores);
+                    }
                 };
                 
                 // Toggle tens selection
@@ -216,114 +677,13 @@
                         return;
                     }
                     
-                    setTensSelections(prev => ({
-                        ...prev,
+                    const newTensSelections = {
+                        ...tensSelections,
                         [playerIndex]: {
-                            ...prev[playerIndex],
-                            [hole]: !prev[playerIndex][hole]
+                            ...tensSelections[playerIndex],
+                            [hole]: !tensSelections[playerIndex][hole]
                         }
-                    }));
-                };
-                
-                // Update wolf selection for a hole
-                const updateWolfSelection = (holeNumber, selection) => {
-                    setWolfSelections(prev => ({
-                        ...prev,
-                        [holeNumber]: selection
-                    }));
-                };
-                
-                // Start new round
-                const startNewRound = () => {
-                    setStep('setup');
-                    setScores({});
-                    setTensSelections({});
-                    setWolfSelections({});
-                    setSelectedCourse(null);
-                    setCourses([]);
-                    setSearchQuery('');
-                    setPlayTens(false);
-                    setPlaySkins(false);
-                    setSkinsMode('push');
-                    setPlayWolf(false);
-                    GolfUtils.saveToStorage('current-round', null);
-                };
-                
-                // Render based on current step
-                if (step === 'setup') {
-                    return e(window.PlayerSetup, {
-                        numPlayers,
-                        setNumPlayers,
-                        players,
-                        setPlayers,
-                        playTens,
-                        setPlayTens,
-                        playSkins,
-                        setPlaySkins,
-                        skinsMode,
-                        setSkinsMode,
-                        playWolf,
-                        setPlayWolf,
-                        onContinue: () => setStep('course-search')
-                    });
-                }
-                
-                if (step === 'course-search') {
-                    return e(window.CourseSearch, {
-                        searchQuery,
-                        setSearchQuery,
-                        loading,
-                        courses,
-                        onSearch: searchCourses,
-                        onSelectCourse: selectCourse,
-                        onBack: () => setStep('setup')
-                    });
-                }
-                
-                if (step === 'scorecard' && selectedCourse) {
-                    return e(window.Scorecard, {
-                        course: selectedCourse,
-                        players,
-                        scores,
-                        tensSelections,
-                        playTens,
-                        playSkins,
-                        skinsMode,
-                        playWolf,
-                        wolfSelections,
-                        onUpdateScore: updateScore,
-                        onToggleTens: toggleTensSelection,
-                        onUpdateWolfSelection: updateWolfSelection,
-                        onBack: () => setStep('course-search'),
-                        onNewRound: startNewRound
-                    });
-                }
-                
-                return e('div', { className: 'card text-center' }, 
-                    e('h1', { className: 'text-xl font-bold mb-4' }, 'Golf Scorecard Pro'),
-                    e('p', { className: 'text-gray-600' }, 'Ready to start your round!'),
-                    e('button', {
-                        onClick: () => setStep('setup'),
-                        className: 'btn mt-4'
-                    }, 'Start New Round')
-                );
-            };
-            
-            // Render the application
-            GolfUtils.showApp();
-            ReactDOM.render(e(GolfScorecardApp), GolfUtils.$('app'));
-            console.log('✅ Golf Scorecard Pro loaded successfully!');
-            
-        } catch (error) {
-            GolfUtils.handleError(error, 'startGolfApp');
-            GolfUtils.showError();
-        }
-    };
-    
-    // Wait for DOM to be ready, then initialize
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeApp);
-    } else {
-        initializeApp();
-    }
-})();
+                    };
+                    setTensSelections(newTensSelections);
+                    
+                    //

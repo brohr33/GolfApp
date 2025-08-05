@@ -91,7 +91,14 @@ window.PlayerSetup = (function() {
                         e('h3', { className: 'font-semibold text-lg mb-3' }, '🔗 Join Existing Game?'),
                         e('p', { className: 'text-gray-600 mb-4' }, 'Have a game ID from a friend? Join their game instead!'),
                         e('button', {
-                            onClick: onJoinGame,
+                            onClick: () => {
+                                console.log('Join game button clicked', { onJoinGame });
+                                if (onJoinGame) {
+                                    onJoinGame();
+                                } else {
+                                    console.error('onJoinGame function not provided');
+                                }
+                            },
                             className: 'btn btn-secondary'
                         }, '🔗 Join Game')
                     )
@@ -252,14 +259,24 @@ window.PlayerSetup = (function() {
                     gameId ? 
                         // Already in a multiplayer game
                         e('button', {
-                            onClick: onContinue,
+                            onClick: () => {
+                                console.log('Continue to course search clicked');
+                                onContinue();
+                            },
                             className: 'btn',
                             style: { width: '100%', padding: '16px' },
                             disabled: !validateSetup()
                         }, '🔍 Find Golf Course →') :
                         // Not in a game yet - create new multiplayer game
                         e('button', {
-                            onClick: onCreateGame,
+                            onClick: () => {
+                                console.log('Create multiplayer game clicked', { onCreateGame });
+                                if (onCreateGame) {
+                                    onCreateGame();
+                                } else {
+                                    console.error('onCreateGame function not provided');
+                                }
+                            },
                             className: 'btn',
                             style: { width: '100%', padding: '16px' },
                             disabled: !validateSetup()
