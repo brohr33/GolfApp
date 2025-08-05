@@ -131,7 +131,240 @@
                         setJoinGameId(urlGameId);
                         handleJoinGame(urlGameId);
                     } else {
-                        // Sync to multiplayer game
+                        // Try to load local game
+                        const savedData = GolfUtils.loadFromStorage('current-round');
+                        if (savedData && !savedData.gameId) {
+                            // Old local game - load it
+                            loadGameState(savedData);
+                        }
+                    }
+                }, []);
+                
+                // Game state update handler
+                const handleGameUpdate = (gameData) => {
+                    setConnectionStatus('connected');
+                    loadGameState(gameData);
+                };
+                
+                // Load game state from data
+                const loadGameState = (gameData) => {
+                    setStep(gameData.step || 'setup');
+                    setPlayers(gameData.players || players);
+                    setPlayTens(gameData.playTens || false);
+                    setPlaySkins(gameData.playSkins || false);
+                    setSkinsMode(gameData.skinsMode || 'push');
+                    setPlayWolf(gameData.playWolf || false);
+                    setWolfSelections(gameData.wolfSelections || {});
+                    if (gameData.selectedCourse) setSelectedCourse(gameData.selectedCourse);
+                    if (gameData.scores) setScores(gameData.scores);
+                    if (gameData.tensSelections) setTensSelections(gameData.tensSelections);
+                    if (gameData.gameId) {
+                        setGameId(gameData.gameId);
+                        GameSync.setGameIdInURL(gameData.gameId);
+                    }
+                };
+                
+                // Create new multiplayer game
+                const createNewGame = async () => {
+                    console.log('createNewGame function called');
+                    try {
+                        setLoading(true);
+                        console.log('Creating game with data:', {
+                            step,
+                            players,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf
+                        });
+                        
+                        const gameData = {
+                            step,
+                            players,
+                            playTens,
+                            playSkins,
+                            skinsMode,
+                            playWolf,
+                            wolfSelections,
+                            selectedCourse,
+                            scores,
+                            tensSelections
+                        };
+                        
+                        console.log('Calling GameSync.createGame...');
+                        const newGameId = await GameSync.createGame(gameData);
+                        console.log('Game created with ID:', newGameId);
+                        
+                        setGameId(newGameId);
+                        setIsHost(true);
+                        GameSync.setHost(true);
+                        GameSync.setGameIdInURL(newGameId);
+                        
+                        console.log('Starting sync...');
+                        // Start syncing
+                        GameSync.startSync(newGameId, handleGameUpdate);
+                        setConnectionStatus('connected');
+                        console.log('Game creation complete');
+                        
+                    } catch (error) {
+                        console.error('Failed to create game:', error);
+                        setConnectionStatus('error');
+                        alert('Failed to create game: ' + error.message);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                // Join existing game
+                const handleJoinGame = async (targetGameId) => {
+                    try {
+                        setLoading(true);
+                        const gameData = await GameSync.joinGame(targetGameId);
+                        
+                        setGameId(targetGameId);
+                        setIsHost(false);
+                        GameSync.setHost(false);
+                        GameSync.setGameIdInURL(targetGameId);
+                        
+                        // Load the game state
+                        loadGameState(gameData);
+                        
+                        // Start syncing
+                        GameSync.startSync(targetGameId, handleGameUpdate);
+                        setConnectionStatus('connected');
+                        setShowJoinGame(false);
+                        
+                    } catch (error) {
+                        console.error('Failed to join game:', error);
+                        setConnectionStatus('error');
+                        alert('Failed to join game. Please check the game ID and try again.');
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+                
+                // Debounced update functions to avoid too many database writes
+                const debouncedUpdateScores = GolfUtils.debounce(
+                    (newScores) => GameSync.updateScores(newScores), 
+                    500
+                );
+                
+                const debouncedUpdateTens = GolfUtils.debounce(
+                    (newTensSelections) => GameSync.updateTensSelections(newTensSelections), 
+                    300
+                );
+                
+                // Update game state (immediate for important changes)
+                const updateGameState = async (updates) => {
+                    if (gameId) {
+                        try {
+                            await GameSync.updateGame(updates);
+                        } catch (error) {
+                            console.error('Failed to sync game state:', error);
+                            setConnectionStatus('error');
+                        }
+                    }
+                };
+                
+                // Course search with API integration
+                const searchCourses = async () => {
+                    if (!searchQuery.trim()) return;
+                    
+                    setLoading(true);
+                    
+                    try {
+                        const apiCourses = await GolfAPI.searchCourses(searchQuery);
+                        
+                        const processedCourses = apiCourses.map(course => ({
+                            ...course,
+                            holes: CourseData.validateAndFixHoles(course.holes)
+                        }));
+                        
+                        setCourses(processedCourses);
+                        
+                    } catch (error) {
+                        console.log('API search failed, using fallback data');
+                        const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
+                        setCourses(fallbackCourses);
+                    }
+                    
+                    setLoading(false);
+                };
+                
+                // Select course and initialize scoring
+                const selectCourse = async (course) => {
+                    setSelectedCourse(course);
+                    
+                    const initialScores = {};
+                    const initialTensSelections = {};
+                    const initialWolfSelections = {};
+                    
+                    players.forEach((player, playerIndex) => {
+                        initialScores[playerIndex] = {};
+                        initialTensSelections[playerIndex] = {};
+                        course.holes.forEach(hole => {
+                            initialScores[playerIndex][hole.hole] = '';
+                            initialTensSelections[playerIndex][hole.hole] = false;
+                        });
+                    });
+                    
+                    // Initialize wolf selections for each hole
+                    course.holes.forEach(hole => {
+                        initialWolfSelections[hole.hole] = null;
+                    });
+                    
+                    setScores(initialScores);
+                    setTensSelections(initialTensSelections);
+                    setWolfSelections(initialWolfSelections);
+                    setStep('scorecard');
+                    
+                    // Update multiplayer game if connected
+                    if (gameId) {
+                        await updateGameState({
+                            selectedCourse: course,
+                            scores: initialScores,
+                            tensSelections: initialTensSelections,
+                            wolfSelections: initialWolfSelections,
+                            step: 'scorecard'
+                        });
+                    }
+                };
+                
+                // Update player score
+                const updateScore = (playerIndex, hole, score) => {
+                    const newScores = {
+                        ...scores,
+                        [playerIndex]: {
+                            ...scores[playerIndex],
+                            [hole]: score
+                        }
+                    };
+                    setScores(newScores);
+                    
+                    // Sync to multiplayer game
+                    if (gameId) {
+                        debouncedUpdateScores(newScores);
+                    }
+                };
+                
+                // Toggle tens selection
+                const toggleTensSelection = (playerIndex, hole) => {
+                    const currentSelections = tensSelections[playerIndex] || {};
+                    
+                    if (!GolfScoring.canSelectForTens(currentSelections, hole)) {
+                        return;
+                    }
+                    
+                    const newTensSelections = {
+                        ...tensSelections,
+                        [playerIndex]: {
+                            ...tensSelections[playerIndex],
+                            [hole]: !tensSelections[playerIndex][hole]
+                        }
+                    };
+                    setTensSelections(newTensSelections);
+                    
+                    // Sync to multiplayer game
                     if (gameId) {
                         debouncedUpdateTens(newTensSelections);
                     }
@@ -453,237 +686,4 @@
     } else {
         initializeApp();
     }
-})(); Try to load local game
-                        const savedData = GolfUtils.loadFromStorage('current-round');
-                        if (savedData && !savedData.gameId) {
-                            // Old local game - load it
-                            loadGameState(savedData);
-                        }
-                    }
-                }, []);
-                
-                // Game state update handler
-                const handleGameUpdate = (gameData) => {
-                    setConnectionStatus('connected');
-                    loadGameState(gameData);
-                };
-                
-                // Load game state from data
-                const loadGameState = (gameData) => {
-                    setStep(gameData.step || 'setup');
-                    setPlayers(gameData.players || players);
-                    setPlayTens(gameData.playTens || false);
-                    setPlaySkins(gameData.playSkins || false);
-                    setSkinsMode(gameData.skinsMode || 'push');
-                    setPlayWolf(gameData.playWolf || false);
-                    setWolfSelections(gameData.wolfSelections || {});
-                    if (gameData.selectedCourse) setSelectedCourse(gameData.selectedCourse);
-                    if (gameData.scores) setScores(gameData.scores);
-                    if (gameData.tensSelections) setTensSelections(gameData.tensSelections);
-                    if (gameData.gameId) {
-                        setGameId(gameData.gameId);
-                        GameSync.setGameIdInURL(gameData.gameId);
-                    }
-                };
-                
-                // Create new multiplayer game
-                const createNewGame = async () => {
-                    console.log('createNewGame function called');
-                    try {
-                        setLoading(true);
-                        console.log('Creating game with data:', {
-                            step,
-                            players,
-                            playTens,
-                            playSkins,
-                            skinsMode,
-                            playWolf
-                        });
-                        
-                        const gameData = {
-                            step,
-                            players,
-                            playTens,
-                            playSkins,
-                            skinsMode,
-                            playWolf,
-                            wolfSelections,
-                            selectedCourse,
-                            scores,
-                            tensSelections
-                        };
-                        
-                        console.log('Calling GameSync.createGame...');
-                        const newGameId = await GameSync.createGame(gameData);
-                        console.log('Game created with ID:', newGameId);
-                        
-                        setGameId(newGameId);
-                        setIsHost(true);
-                        GameSync.setHost(true);
-                        GameSync.setGameIdInURL(newGameId);
-                        
-                        console.log('Starting sync...');
-                        // Start syncing
-                        GameSync.startSync(newGameId, handleGameUpdate);
-                        setConnectionStatus('connected');
-                        console.log('Game creation complete');
-                        
-                    } catch (error) {
-                        console.error('Failed to create game:', error);
-                        setConnectionStatus('error');
-                        alert('Failed to create game: ' + error.message);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                
-                // Join existing game
-                const handleJoinGame = async (targetGameId) => {
-                    try {
-                        setLoading(true);
-                        const gameData = await GameSync.joinGame(targetGameId);
-                        
-                        setGameId(targetGameId);
-                        setIsHost(false);
-                        GameSync.setHost(false);
-                        GameSync.setGameIdInURL(targetGameId);
-                        
-                        // Load the game state
-                        loadGameState(gameData);
-                        
-                        // Start syncing
-                        GameSync.startSync(targetGameId, handleGameUpdate);
-                        setConnectionStatus('connected');
-                        setShowJoinGame(false);
-                        
-                    } catch (error) {
-                        console.error('Failed to join game:', error);
-                        setConnectionStatus('error');
-                        alert('Failed to join game. Please check the game ID and try again.');
-                    } finally {
-                        setLoading(false);
-                    }
-                };
-                
-                // Debounced update functions to avoid too many database writes
-                const debouncedUpdateScores = GolfUtils.debounce(
-                    (newScores) => GameSync.updateScores(newScores), 
-                    500
-                );
-                
-                const debouncedUpdateTens = GolfUtils.debounce(
-                    (newTensSelections) => GameSync.updateTensSelections(newTensSelections), 
-                    300
-                );
-                
-                // Update game state (immediate for important changes)
-                const updateGameState = async (updates) => {
-                    if (gameId) {
-                        try {
-                            await GameSync.updateGame(updates);
-                        } catch (error) {
-                            console.error('Failed to sync game state:', error);
-                            setConnectionStatus('error');
-                        }
-                    }
-                };
-                
-                // Course search with API integration
-                const searchCourses = async () => {
-                    if (!searchQuery.trim()) return;
-                    
-                    setLoading(true);
-                    
-                    try {
-                        const apiCourses = await GolfAPI.searchCourses(searchQuery);
-                        
-                        const processedCourses = apiCourses.map(course => ({
-                            ...course,
-                            holes: CourseData.validateAndFixHoles(course.holes)
-                        }));
-                        
-                        setCourses(processedCourses);
-                        
-                    } catch (error) {
-                        console.log('API search failed, using fallback data');
-                        const fallbackCourses = CourseData.generateFallbackCourses(searchQuery);
-                        setCourses(fallbackCourses);
-                    }
-                    
-                    setLoading(false);
-                };
-                
-                // Select course and initialize scoring
-                const selectCourse = async (course) => {
-                    setSelectedCourse(course);
-                    
-                    const initialScores = {};
-                    const initialTensSelections = {};
-                    const initialWolfSelections = {};
-                    
-                    players.forEach((player, playerIndex) => {
-                        initialScores[playerIndex] = {};
-                        initialTensSelections[playerIndex] = {};
-                        course.holes.forEach(hole => {
-                            initialScores[playerIndex][hole.hole] = '';
-                            initialTensSelections[playerIndex][hole.hole] = false;
-                        });
-                    });
-                    
-                    // Initialize wolf selections for each hole
-                    course.holes.forEach(hole => {
-                        initialWolfSelections[hole.hole] = null;
-                    });
-                    
-                    setScores(initialScores);
-                    setTensSelections(initialTensSelections);
-                    setWolfSelections(initialWolfSelections);
-                    setStep('scorecard');
-                    
-                    // Update multiplayer game if connected
-                    if (gameId) {
-                        await updateGameState({
-                            selectedCourse: course,
-                            scores: initialScores,
-                            tensSelections: initialTensSelections,
-                            wolfSelections: initialWolfSelections,
-                            step: 'scorecard'
-                        });
-                    }
-                };
-                
-                // Update player score
-                const updateScore = (playerIndex, hole, score) => {
-                    const newScores = {
-                        ...scores,
-                        [playerIndex]: {
-                            ...scores[playerIndex],
-                            [hole]: score
-                        }
-                    };
-                    setScores(newScores);
-                    
-                    // Sync to multiplayer game
-                    if (gameId) {
-                        debouncedUpdateScores(newScores);
-                    }
-                };
-                
-                // Toggle tens selection
-                const toggleTensSelection = (playerIndex, hole) => {
-                    const currentSelections = tensSelections[playerIndex] || {};
-                    
-                    if (!GolfScoring.canSelectForTens(currentSelections, hole)) {
-                        return;
-                    }
-                    
-                    const newTensSelections = {
-                        ...tensSelections,
-                        [playerIndex]: {
-                            ...tensSelections[playerIndex],
-                            [hole]: !tensSelections[playerIndex][hole]
-                        }
-                    };
-                    setTensSelections(newTensSelections);
-                    
-                    //
+})();
