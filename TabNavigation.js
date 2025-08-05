@@ -1,4 +1,4 @@
-// Tab Navigation Component
+// Tab Navigation Component - Updated with Current Hole tab
 window.TabNavigation = (function() {
     'use strict';
     
@@ -13,6 +13,7 @@ window.TabNavigation = (function() {
     }) {
         
         const tabs = [
+            { id: 'current', label: 'Current Hole', icon: '🎯', color: '#2563eb', shortLabel: 'Current' },
             { id: 'scorecard', label: 'Scorecard', icon: '⛳', color: '#059669', shortLabel: 'Card' },
             ...(playTens ? [{ id: 'tens', label: 'Game of Tens', icon: '🏆', color: '#7c3aed', shortLabel: 'Tens' }] : []),
             ...(playSkins ? [{ id: 'skins', label: 'Skins', icon: '🎯', color: '#ea580c', shortLabel: 'Skins' }] : []),

@@ -5,6 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golf Scorecard Pro - Professional Golf Scoring</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for Current Hole tab */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .current-hole-input {
+            transition: all 0.3s ease;
+        }
+        
+        .current-hole-input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        
+        .hole-complete {
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        /* Enhanced mobile styles for current hole */
+        @media (max-width: 640px) {
+            .current-hole-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .current-hole-input {
+                font-size: 20px;
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -52,6 +86,7 @@
     <script src="api.js"></script>
     <script src="PlayerSetup.js"></script>
     <script src="CourseSearch.js"></script>
+    <script src="CurrentHole.js"></script>
     <script src="TabNavigation.js"></script>
     <script src="GameOfTens.js"></script>
     <script src="Skins.js"></script>

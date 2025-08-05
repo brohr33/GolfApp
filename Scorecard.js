@@ -1,4 +1,4 @@
-// Main Scorecard Component with Tabbed Interface
+// Main Scorecard Component with Tabbed Interface - Updated with Current Hole tab
 window.Scorecard = (function() {
     'use strict';
     
@@ -21,7 +21,7 @@ window.Scorecard = (function() {
         onNewRound 
     }) {
         
-        const [activeTab, setActiveTab] = useState('scorecard');
+        const [activeTab, setActiveTab] = useState('current'); // Default to current hole tab
         
         const renderHoleRow = (hole, holeIndex) => {
             const isEvenRow = holeIndex % 2 === 0;
@@ -259,6 +259,23 @@ window.Scorecard = (function() {
         
         const renderTabContent = () => {
             switch (activeTab) {
+                case 'current':
+                    return window.CurrentHole ? 
+                        e(window.CurrentHole, {
+                            course,
+                            players,
+                            scores,
+                            tensSelections,
+                            playTens,
+                            playWolf,
+                            wolfSelections,
+                            onUpdateScore,
+                            onToggleTens,
+                            onUpdateWolfSelection
+                        }) : e('div', { className: 'card text-center' },
+                            e('h3', { className: 'text-xl font-bold mb-4' }, 'Current Hole Loading...'),
+                            e('p', null, 'Please wait while the current hole component loads.')
+                        );
                 case 'scorecard':
                     return renderScorecardContent();
                 case 'tens':
