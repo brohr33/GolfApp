@@ -91,7 +91,7 @@ window.GameOfTens = (function() {
                         e('span', { 
                             className: 'font-bold',
                             style: { 
-                                color: tensData.selectedHoles === 0 ? '#059669' : '#dc2626' 
+                                color: tensData.selectedHoles === 10 ? '#059669' : '#dc2626' 
                             }
                         }, `${tensData.selectedHoles}/10`)
                     ),
@@ -119,7 +119,7 @@ window.GameOfTens = (function() {
                         e('span', { className: 'font-bold' }, tensData.parTotal || 0)
                     ),
                     
-                    tensData.selectedHoles === 0 && e('div', { 
+                    tensData.selectedHoles > 0 && e('div', { 
                         className: 'flex-between',
                         style: { 
                             borderTop: '1px solid #e5e7eb', 
@@ -132,7 +132,7 @@ window.GameOfTens = (function() {
                             className: 'font-bold',
                             style: { 
                                 color: overUnder > 0 ? '#dc2626' : overUnder < 0 ? '#059669' : '#6b7280',
-                                fontSize: '18px'
+                                fontSize: tensData.selectedHoles === 10 ? '18px' : '16px'
                             }
                         }, GolfScoring.formatToPar(tensData.netScore, tensData.parTotal))
                     )
@@ -213,7 +213,7 @@ window.GameOfTens = (function() {
                 playerIndex: index,
                 ...calculatePlayerTensData(index)
             }))
-            .filter(data => data.selectedHoles === 0) // Only complete tens
+            .filter(data => data.selectedHoles === 10) // Only complete tens
             .sort((a, b) => a.netScore - b.netScore); // Sort by net score
         };
         
