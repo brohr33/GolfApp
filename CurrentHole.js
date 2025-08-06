@@ -1,4 +1,4 @@
-// Current Hole Component - Focused single hole entry
+// Current Hole Component - Focused single hole entry with smart navigation
 window.CurrentHole = (function() {
     'use strict';
     
@@ -19,13 +19,25 @@ window.CurrentHole = (function() {
         
         const [currentHoleNumber, setCurrentHoleNumber] = useState(1);
         
-        // Start at hole 1 by default (no auto-advance)
-        useEffect(() => {
-            // Only set to hole 1 on initial load, don't auto-advance based on scores
-            if (currentHoleNumber === 1) {
-                setCurrentHoleNumber(1);
+        // Helper function to find the next incomplete hole
+        const findNextIncompleteHole = () => {
+            for (let holeNum = 1; holeNum <= 18; holeNum++) {
+                const isComplete = players.every((_, playerIndex) => {
+                    const score = parseInt(scores[playerIndex]?.[holeNum]);
+                    return score && score > 0;
+                });
+                if (!isComplete) {
+                    return holeNum;
+                }
             }
-        }, []);
+            return 18; // If all holes are complete, stay on hole 18
+        };
+        
+        // Auto-advance to next incomplete hole when component mounts or scores change
+        useEffect(() => {
+            const nextIncompleteHole = findNextIncompleteHole();
+            setCurrentHoleNumber(nextIncompleteHole);
+        }, [scores, players]); // Re-run when scores or players change
         
         const currentHole = course.holes.find(h => h.hole === currentHoleNumber);
         
