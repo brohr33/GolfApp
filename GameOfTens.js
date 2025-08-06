@@ -213,7 +213,7 @@ window.GameOfTens = (function() {
                 playerIndex: index,
                 ...calculatePlayerTensData(index)
             }))
-            .filter(data => data.selectedHoles === 10) // Only complete tens
+            .filter(data => data.selectedHoles === 0) // Only complete tens
             .sort((a, b) => a.netScore - b.netScore); // Sort by net score
         };
         
